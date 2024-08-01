@@ -6,19 +6,19 @@ export class User extends BaseEntity
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column()
-    codigo: string;
+    @Column({ unique: true })
+    codigo: number;
 
     @Column({ length: 40 })
     nome: string;
 
-    @Column({ length: 40 })
+    @Column({ length: 40, unique: true })
     email: string;
 
-    @Column("float")
+    @Column("float", {default: 0})
     ecosaldo: number;
 
-    @Column()
+    @Column({ unique: true })
     cpf: number;
 
     @Column({ length: 20 })
