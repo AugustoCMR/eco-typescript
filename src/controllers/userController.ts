@@ -27,6 +27,21 @@ export class UserController
             res.status(400).json({ error: error });
         }
     }
+
+    async getAllUsers(req: Request, res: Response)
+    {
+        try
+        {
+            const users = await userRepository.find();
+
+            res.json(users);
+        }
+        catch(error)
+        {
+            console.error("Erro ao buscar clientes:", error);
+            res.status(500).json({ error: error });
+        }
+    }
     async getUserById(req: Request, res: Response)
     {   
         try
