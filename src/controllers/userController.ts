@@ -13,7 +13,8 @@ export class UserController
         this.userService = new UserService();
     }
 
-    createUser = async (req: Request, res: Response) => {   
+    createUser = async (req: Request, res: Response) => 
+    {   
         try 
         {   
             await this.userService.createUser(req.body);
@@ -24,6 +25,22 @@ export class UserController
         catch (error) 
         {
             console.error("Erro ao criar cliente:", error);
+            res.status(400).json({ error: error });
+        }
+    }
+
+    updateUser = async (req: Request, res: Response) => 
+    {
+        try 
+        {
+            const id = parseInt(req.params.id);
+            await this.userService.updateUser(id, req.body);
+
+            res.status(201).json( { message: 'Usuário atualizado com sucesso!'} );
+        } 
+        catch (error) 
+        {
+            console.error("Erro ao atualizar cliente:", error);
             res.status(400).json({ error: error });
         }
     }
