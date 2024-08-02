@@ -45,6 +45,22 @@ export class UserController
         }
     }
 
+    deleteUser = async (req: Request, res: Response) =>
+    {
+        try 
+        {
+            const id = parseInt(req.params.id);
+            await this.userService.deleteUser(id);
+
+            res.status(204).send();
+        } 
+        catch (error) 
+        {
+            console.error("Erro ao deletar cliente:", error);
+            res.status(400).json({ error: error });
+        }
+    }
+
     async getAllUsers(req: Request, res: Response)
     {
         try
