@@ -9,4 +9,21 @@ export class ResidueService
         const newResidue = residueRepository.create(residue);
         await residueRepository.save(newResidue);
     }
+
+    async updateResidue(id: number, residue: Residue)
+    {
+        await residueRepository.save
+        (
+            {
+                ...residue,
+                id
+            }
+        )
+    }
+
+    async deleteResidue(id: number)
+    {
+        await residueRepository.delete(id);
+    }
+    
 }

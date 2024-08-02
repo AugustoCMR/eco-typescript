@@ -31,11 +31,30 @@ export class ResidueController
         try 
         {
             const id = parseInt(req.params.id);
-            await this.residueService.updateResidue()
+            await this.residueService.updateResidue(id, req.body);
+
+            res.status(201).json( {message: "Usuário atualizado com sucesso"} );
         } 
         catch (error) 
         {
-            
+            console.error("Erro ao atualizar resíduo:", error);
+            res.status(400).json({ error: error });
         }
     }
-}
+
+    deleteResidue = async (req: Request, res: Response) =>
+    {
+        try 
+        {
+            const id = parseInt(req.params.id);
+            await this.residueService.deleteResidue(id);
+
+            res.status(204).send();
+        } 
+        catch (error) 
+        {
+            console.error("Erro ao deletar resíduo:", error);
+            res.status(400).json({ error: error });
+        }
+    }
+}   
