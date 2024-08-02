@@ -25,4 +25,17 @@ export class ResidueController
             res.status(400).json({ error: error });
         }
     }
+
+    updateResidue = async (req: Request, res: Response) =>
+    {
+        try 
+        {
+            const id = parseInt(req.params.id);
+            await this.residueService.updateResidue()
+        } 
+        catch (error) 
+        {
+            
+        }
+    }
 }
