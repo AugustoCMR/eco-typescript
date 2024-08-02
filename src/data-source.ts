@@ -1,5 +1,6 @@
 import { DataSource } from "typeorm";
 import { User } from "./models/userModel";
+import { Residue } from "./models/residueModel";
 
 export const AppDataSource = new DataSource({
   type: process.env.DB as any,
@@ -10,7 +11,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_DATABASE,
   synchronize: true,
   logging: true,
-  entities: [User],
+  entities: [User, Residue],
   subscribers: [],
   migrations: [],
 })
