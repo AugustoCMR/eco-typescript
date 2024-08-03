@@ -25,9 +25,9 @@ export class ResidueService
         )
     }
 
-    async deleteResidue(id: number)
+    async deleteResidue(code: number)
     {
-        await residueRepository.delete({ codigo: id });
+        await residueRepository.delete({ codigo: code });
     }
     
 }   

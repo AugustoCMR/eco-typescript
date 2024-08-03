@@ -1,26 +1,32 @@
 import { Customer } from "../models/customerModel";
 import { customerRepository } from "../repositories/customerRepository";
+import { CodeGenerator } from "../utils/codeGenerator";
 
 export class CustomerService 
 {
 
     async createCustomer(customer: Customer) 
     {
-        customer.codigo = 1;
+        let code: number = await new CodeGenerator().generateCode("customer");
+
+        customer.codigo = code;
         const newCustomer = customerRepository.create(customer);
         await customerRepository.save(newCustomer);
     }
 
-    async updateCustomer(id: number, customer: Customer) 
+    async updateCustomer(code: number, customer: Customer) 
     {
-      await customerRepository.save({
-        ...customer,
-        id,
-      });
+        await customerRepository.update
+        (   
+            {codigo: code},
+            {
+                ...customer
+            }   
+        );
     }
 
-    async deleteCustomer(id: number) 
+    async deleteCustomer(code: number) 
     {
-      await customerRepository.delete({ codigo: id });
+      await customerRepository.delete({ codigo: code });
     }
 }

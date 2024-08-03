@@ -47,8 +47,8 @@ export class ResidueController
     {
         try 
         {
-            const id = parseInt(req.params.id);
-            await this.residueService.deleteResidue(id);
+            const code = parseInt(req.params.id);
+            await this.residueService.deleteResidue(code);
 
             res.status(204).send();
         } 
@@ -78,8 +78,8 @@ export class ResidueController
     {
         try 
         {
-            const id = parseInt(req.params.id);
-            const residue = await residueRepository.findOneBy({ codigo: id });
+            const code = parseInt(req.params.id);
+            const residue = await residueRepository.findOneBy({ codigo: code });
             
             if(residue)
             {
