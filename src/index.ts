@@ -6,12 +6,14 @@ import express from "express";
 
 import customerRoutes from "./routes/customerRoutes";
 import residueRoutes from "./routes/residueRoutes";
+import materialRoutes from "./routes/materialRoutes";
 
 const app = express();
 app.use(express.json());
 
 app.use("/customers", customerRoutes);
 app.use("/residues", residueRoutes);
+app.use("/materials", materialRoutes);
 
 app.listen(process.env.PORT, () => {
   AppDataSource.initialize()

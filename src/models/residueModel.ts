@@ -1,4 +1,5 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Material } from "./materialModel";
 
 @Entity()
 export class Residue extends BaseEntity
@@ -11,4 +12,7 @@ export class Residue extends BaseEntity
 
     @Column({ unique: true, length: 30 })
     nome: string;
+
+    @OneToMany(() => Material, material => material.residue)
+    materials: Material;
 }
