@@ -1,29 +1,33 @@
 import { Residue } from "../models/residueModel";
 import { residueRepository } from "../repositories/residueRepository";
+import { CodeGenerator } from "../utils/codeGenerator";
 
 export class ResidueService
 {
     async createResidue(residue: Residue)
-    {
-        residue.codigo = 1;
+    {   
+        let code: number = await new CodeGenerator().generateCode("residue");
+
+        residue.codigo = code;
         const newResidue = residueRepository.create(residue);
         await residueRepository.save(newResidue);
     }
 
-    async updateResidue(id: number, residue: Residue)
+    async updateResidue(code: number, residue: Residue)
     {
-        await residueRepository.save
+        await residueRepository.update
         (
+            {codigo: code},
             {
                 ...residue,
-                id
+                
             }
         )
     }
 
     async deleteResidue(id: number)
     {
-        await residueRepository.delete(id);
+        await residueRepository.delete({ codigo: id });
     }
     
-}
+}   
