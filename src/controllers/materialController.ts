@@ -26,7 +26,23 @@ export class MaterialController
         }
     }
 
-    async getAllMaterials(req: Request, res: Response)
+    updateMaterial = async (req: Request, res: Response) =>
+    {
+        try 
+        {
+            const code = parseInt(req.params.id);
+            await this.materialService.updateMaterial(code, req.body);
+            
+            res.status(201).json( {message: "Material atualizado com sucesso"} )
+        } 
+        catch (error) 
+        {
+            console.error("Erro ao atualizar material:", error);
+            res.status(400).json({ error: error });
+        }
+    }
+
+    async getAllMaterials (req: Request, res: Response)
     {
         try
         {

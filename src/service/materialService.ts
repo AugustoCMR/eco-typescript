@@ -12,4 +12,15 @@ export class MaterialService
         const newMaterial = materialRepository.create(material);
         await materialRepository.save(newMaterial);
     }
+
+    async updateMaterial(code: number, material: Material)
+    {
+        await materialRepository.update
+        (
+            {codigo: code},
+            {
+                ...material
+            }
+        )
+    }
 }
