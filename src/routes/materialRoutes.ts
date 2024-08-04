@@ -5,5 +5,6 @@ const router = express.Router();
 const materialController = new MaterialController();
 
 router.post("/", materialController.createMaterial);
+router.get("/", materialController.getAllMaterials);
 
 export default router;
