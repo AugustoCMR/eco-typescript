@@ -8,5 +8,6 @@ router.post("/", materialController.createMaterial);
 router.put("/:id", materialController.updateMaterial);
 router.delete("/:id", materialController.deleteMaterial);
 router.get("/", materialController.getAllMaterials);
+router.get("/:id", materialController.getMaterialById);
 
 export default router;

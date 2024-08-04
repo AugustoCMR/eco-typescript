@@ -73,4 +73,27 @@ export class MaterialController
             res.status(500).json({ error: error });
         }
     }
+
+    async getMaterialById(req: Request, res: Response)
+    {
+        try 
+        {
+            const code = parseInt(req.params.id);
+            const material = await materialRepository.findOneBy({codigo: code});
+
+            if(material)
+            {
+                res.json(material);
+            }
+            else
+            {
+                res.status(404).json({ message: 'Material não encontrado'});
+            }
+        } 
+        catch (error) 
+        {
+            console.error("Erro ao buscar material:", error);
+            res.status(500).json({ error: error});
+        }
+    }
 }
