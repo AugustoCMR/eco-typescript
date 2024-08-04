@@ -27,6 +27,6 @@ export class CustomerService
 
     async deleteCustomer(code: number) 
     {
-      await customerRepository.delete({ codigo: code });
+        await customerRepository.delete({ codigo: code });
     }
 }

@@ -23,4 +23,10 @@ export class MaterialService
             }
         )
     }
+
+    async deleteMaterial(code: number)
+    {
+        await materialRepository.delete({ codigo: code });
+      
+    }
 }

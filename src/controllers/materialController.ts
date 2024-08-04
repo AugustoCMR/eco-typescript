@@ -42,6 +42,23 @@ export class MaterialController
         }
     }
 
+    deleteMaterial = async (req: Request, res: Response) =>
+    {
+        try 
+        {
+            const code = parseInt(req.params.id);
+            await this.materialService.deleteMaterial(code);
+
+            res.status(204).send();
+        }
+        catch (error) 
+        {
+            console.error("Erro ao deletar material:", error);
+            res.status(400).json({ error: error });
+        }
+
+    }
+
     async getAllMaterials (req: Request, res: Response)
     {
         try

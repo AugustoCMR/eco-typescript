@@ -6,6 +6,7 @@ const materialController = new MaterialController();
 
 router.post("/", materialController.createMaterial);
 router.put("/:id", materialController.updateMaterial);
+router.delete("/:id", materialController.deleteMaterial);
 router.get("/", materialController.getAllMaterials);
 
 export default router;
