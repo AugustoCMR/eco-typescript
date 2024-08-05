@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, BaseEntity } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany } from "typeorm";
+import { ReceivedMaterial } from "./receivedMaterialModel";
 
 @Entity()
 export class Customer extends BaseEntity
@@ -41,4 +42,7 @@ export class Customer extends BaseEntity
 
     @Column({ length: 20 })
     numero: string;
+
+    @OneToMany(() => ReceivedMaterial, receivedMaterial => receivedMaterial.customer)
+    receivedMaterials: ReceivedMaterial[];
 }

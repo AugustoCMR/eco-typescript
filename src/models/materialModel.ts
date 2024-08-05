@@ -1,5 +1,6 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne } from "typeorm";
 import { Residue } from "./residueModel";
+import { ReceivedMaterialDetail } from "./receivedMaterialDetailModel";
 
 @Entity()
 export class Material extends BaseEntity
@@ -19,6 +20,12 @@ export class Material extends BaseEntity
     @Column("float")
     ecopoint:  number;
 
+    @Column()
+    quantidade: number;
+
     @ManyToOne(() => Residue, residue => residue.materials)
     residue: Residue;
+
+    @OneToOne(() => ReceivedMaterialDetail, receivedMaterialDetail => receivedMaterialDetail.material)
+    receivedMaterialDetail: ReceivedMaterialDetail;
 }
