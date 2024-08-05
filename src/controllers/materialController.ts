@@ -96,4 +96,19 @@ export class MaterialController
             res.status(500).json({ error: error});
         }
     }
+
+    receivedMaterial = async (req: Request, res: Response) =>
+    {
+        try 
+        {
+            await this.materialService.receivedMaterial(req.body.mestre, req.body.detalhe);
+
+            res.status(201).json({ message: 'Recebimento de material cadastrado com sucesso.' });
+        } 
+        catch (error) 
+        {
+            console.error("Erro ao cadastrar recebimento de material:", error);
+            res.status(500).json({ error: error});
+        }
+    }
 }

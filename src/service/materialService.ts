@@ -1,5 +1,9 @@
 import { Material } from "../models/materialModel";
+import { ReceivedMaterialDetail } from "../models/receivedMaterialDetailModel";
+import { ReceivedMaterial } from "../models/receivedMaterialModel";
 import { materialRepository } from "../repositories/materialRepository";
+import { receivedMaterialDetailRepository } from "../repositories/receivedMaterialDetailRepository";
+import { receivedMaterialRepository } from "../repositories/receivedMaterialRepository";
 import { CodeGenerator } from "../utils/codeGenerator";
 
 export class MaterialService
@@ -28,5 +32,22 @@ export class MaterialService
     {
         await materialRepository.delete({ codigo: code });
       
+    }
+
+    async receivedMaterial(receivedMaterial: ReceivedMaterial, receivedMaterialsDetail: ReceivedMaterialDetail[])
+    {
+        let code: number = await new CodeGenerator().generateCode("received_material");
+
+        receivedMaterial.codigo = code;
+
+        const newReceivedMaterial = receivedMaterialRepository.create(receivedMaterial);
+        const receivedMaterialCreated = await receivedMaterialRepository.save(newReceivedMaterial);
+
+        const savePromises = receivedMaterialsDetail.map(detail => {
+            detail.receivedMaterial = receivedMaterialCreated;
+            return receivedMaterialDetailRepository.save(detail);
+        });
+    
+        await Promise.all(savePromises);
     }
 }

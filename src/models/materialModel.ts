@@ -1,4 +1,4 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne } from "typeorm";
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne, OneToMany } from "typeorm";
 import { Residue } from "./residueModel";
 import { ReceivedMaterialDetail } from "./receivedMaterialDetailModel";
 
@@ -23,7 +23,7 @@ export class Material extends BaseEntity
     @Column()
     quantidade: number;
 
-    @ManyToOne(() => Residue, residue => residue.materials)
+    @OneToMany(() => Residue, residue => residue.materials)
     residue: Residue;
 
     @OneToOne(() => ReceivedMaterialDetail, receivedMaterialDetail => receivedMaterialDetail.material)

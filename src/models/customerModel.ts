@@ -44,5 +44,5 @@ export class Customer extends BaseEntity
     numero: string;
 
     @OneToMany(() => ReceivedMaterial, receivedMaterial => receivedMaterial.customer)
-    receivedMaterials: ReceivedMaterial[];
+    receivedMaterials: ReceivedMaterial;
 }

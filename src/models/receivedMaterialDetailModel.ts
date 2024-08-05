@@ -15,12 +15,12 @@ export class ReceivedMaterialDetail extends BaseEntity
     @Column()
     quantidade: number;
 
+    @Column("float")
+    subtotal: number;
+
     @ManyToOne(() => ReceivedMaterial, receivedMaterial => receivedMaterial.receivedMaterialsDetail)
     receivedMaterial: ReceivedMaterial;
 
-    @OneToOne(() => Material, material => material.receivedMaterialDetail)
-    material: Material
-
-    @Column()
-    unidade_medida: string;
+    @ManyToOne(() => Material, material => material.receivedMaterialDetail)
+    material: Material;
 }
