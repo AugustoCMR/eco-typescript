@@ -10,5 +10,6 @@ router.delete("/:id", productController.deleteProduct);
 router.get("/", productController.getAllProducts);
 router.get("/:id", productController.getProductById);
 router.post("/entrada", productController.insertProductOperation);
+router.post("/saida", productController.removeProductOperation);
 
 export default router;

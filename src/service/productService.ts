@@ -1,7 +1,12 @@
 import { InsertProductOperation } from "../models/insertProductOperationModel";
 import { Product } from "../models/productModel";
+import { RemoveProductOperationDetail } from "../models/removeProductOperationDetailModel";
+import { RemoveProductOperation } from "../models/removeProductOperationModel";
+import { customerRepository } from "../repositories/customerRepository";
 import { insertProductOperationRepository } from "../repositories/insertProductOperationRepository";
 import { productRepository } from "../repositories/productRepository";
+import { removeProductOperationDetailRepository } from "../repositories/removeProductOperationDetailRepository";
+import { removeProductOperationRepository } from "../repositories/removeProductOperationRepository";
 import { CodeGenerator } from "../utils/codeGenerator";
 
 export class ProductService
@@ -50,4 +55,43 @@ export class ProductService
 
         await Promise.all(savePromises);  
     }
+
+    async removeProductOperation (removeProductOperation: RemoveProductOperation, removeProductsOperationDetail: RemoveProductOperationDetail[])
+    {
+        let code: number = await new CodeGenerator().generateCode("remove_product_operation");
+
+        removeProductOperation.codigo = code;
+
+        const newRemoveProductOperation = removeProductOperationRepository.create(removeProductOperation);
+        const removeProductOperationCreated = await removeProductOperationRepository.save(newRemoveProductOperation);
+
+        const customer = await customerRepository.findOneBy({id: removeProductOperationCreated.usuario.id});
+
+        if(customer)
+        {   
+
+            customer.ecosaldo -= Number(removeProductOperationCreated.ecoSaldoTotal);
+
+            await customerRepository.save(customer);
+        }
+        
+        const savePromises = removeProductsOperationDetail.map(async detail =>
+        {
+
+            const product = await productRepository.findOneBy({id: detail.produto.id});
+
+            if(product)
+            {
+                product.quantidade -= detail.quantidade;
+
+                await productRepository.save(product);
+            }
+
+            detail.removeProductOperation = removeProductOperationCreated;
+            return removeProductOperationDetailRepository.save(detail);
+        })
+
+        await Promise.all(savePromises);
+    }
+    
 }

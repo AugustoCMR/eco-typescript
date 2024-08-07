@@ -107,7 +107,7 @@ export class MaterialController
         } 
         catch (error) 
         {
-            console.error("Erro ao cadastrar recebimento de material:", error);
+            console.error("Erro ao cadastrar recebimento de materiais:", error);
             res.status(500).json({ error: error});
         }
     }

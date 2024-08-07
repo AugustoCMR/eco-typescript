@@ -1,6 +1,7 @@
 import { Material } from "../models/materialModel";
 import { ReceivedMaterialDetail } from "../models/receivedMaterialDetailModel";
 import { ReceivedMaterial } from "../models/receivedMaterialModel";
+import { customerRepository } from "../repositories/customerRepository";
 import { materialRepository } from "../repositories/materialRepository";
 import { receivedMaterialDetailRepository } from "../repositories/receivedMaterialDetailRepository";
 import { receivedMaterialRepository } from "../repositories/receivedMaterialRepository";
@@ -42,6 +43,16 @@ export class MaterialService
 
         const newReceivedMaterial = receivedMaterialRepository.create(receivedMaterial);
         const receivedMaterialCreated = await receivedMaterialRepository.save(newReceivedMaterial);
+
+        const customer = await customerRepository.findOneBy({id: receivedMaterialCreated.customer.id});
+
+        if(customer)
+        {   
+
+            customer.ecosaldo += Number(receivedMaterialCreated.ecoSaldoTotal);
+
+            await customerRepository.save(customer);
+        }
 
         const savePromises = receivedMaterialsDetail.map(detail => 
         {

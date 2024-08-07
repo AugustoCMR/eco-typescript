@@ -106,8 +106,23 @@ export class ProductController
         } 
         catch (error) 
         {
-            console.error("Erro ao inserir produto na operação:", error);
+            console.error("Erro ao inserir produtos na operação:", error);
             res.status(500).json({ error: error});
         }
     } 
+
+    removeProductOperation = async (req: Request, res: Response) =>
+    {
+        try 
+        {
+            await this.productService.removeProductOperation(req.body.mestre, req.body.detalhe);
+            
+            res.status(201).json({ message: 'Retirada de produtos cadastrada com sucesso.' });
+        } 
+        catch (error) 
+        {
+            console.error("Erro ao cadastrar retirada de produtos:", error);
+            res.status(500).json({ error: error});
+        }
+    }
 }

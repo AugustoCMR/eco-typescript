@@ -1,5 +1,6 @@
 import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { InsertProductOperation } from "./insertProductOperationModel";
+import { RemoveProductOperationDetail } from "./removeProductOperationDetailModel";
 
 @Entity()
 export class Product extends BaseEntity
@@ -21,4 +22,7 @@ export class Product extends BaseEntity
 
     @OneToMany(() =>  InsertProductOperation, insertProductOperation => insertProductOperation.produto)
     insertProductOperation: InsertProductOperation;
+
+    @OneToMany(() => RemoveProductOperationDetail, removeProductOperationDetail => removeProductOperationDetail.produto)
+    removeProductOperationDetail: RemoveProductOperationDetail;
 }

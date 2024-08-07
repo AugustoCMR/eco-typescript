@@ -1,5 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, BaseEntity, OneToMany } from "typeorm";
 import { ReceivedMaterial } from "./receivedMaterialModel";
+import { RemoveProductOperation } from "./removeProductOperationModel";
 
 @Entity()
 export class Customer extends BaseEntity
@@ -45,4 +46,7 @@ export class Customer extends BaseEntity
 
     @OneToMany(() => ReceivedMaterial, receivedMaterial => receivedMaterial.customer)
     receivedMaterials: ReceivedMaterial;
+
+    @OneToMany(() => RemoveProductOperation, removeProductOperation => removeProductOperation.usuario)
+    removeProductOperation: RemoveProductOperation;
 }
