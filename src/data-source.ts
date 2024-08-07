@@ -5,6 +5,7 @@ import { Material } from "./models/materialModel";
 import { ReceivedMaterial } from "./models/receivedMaterialModel";
 import { ReceivedMaterialDetail } from "./models/receivedMaterialDetailModel";
 import { Product } from "./models/productModel";
+import { InsertProductOperation } from "./models/insertProductOperationModel";
 
 export const AppDataSource = new DataSource({
   type: process.env.DB as any,
@@ -22,6 +23,7 @@ export const AppDataSource = new DataSource({
     ReceivedMaterial,
     ReceivedMaterialDetail,
     Product,
+    InsertProductOperation
   ],
   subscribers: [],
   migrations: [],

@@ -1,4 +1,5 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BaseEntity, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { InsertProductOperation } from "./insertProductOperationModel";
 
 @Entity()
 export class Product extends BaseEntity
@@ -12,6 +13,12 @@ export class Product extends BaseEntity
     @Column({ unique: true, length: 30 })
     nome: string;
 
+    @Column()
+    quantidade: number;
+
     @Column("float")
     ecopoint: number;
+
+    @OneToMany(() =>  InsertProductOperation, insertProductOperation => insertProductOperation.produto)
+    insertProductOperation: InsertProductOperation;
 }

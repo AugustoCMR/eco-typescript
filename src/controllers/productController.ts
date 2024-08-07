@@ -95,4 +95,19 @@ export class ProductController
             res.status(500).json({ error: error});
         }
     }
+
+    insertProductOperation = async (req: Request, res: Response) =>
+    {
+        try 
+        {
+            await this.productService.insertProductOperation(req.body.produtos);
+
+            res.status(201).json({ message: 'Produtos recebidos com sucesso.' });
+        } 
+        catch (error) 
+        {
+            console.error("Erro ao inserir produto na operação:", error);
+            res.status(500).json({ error: error});
+        }
+    } 
 }

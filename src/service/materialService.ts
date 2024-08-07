@@ -43,7 +43,8 @@ export class MaterialService
         const newReceivedMaterial = receivedMaterialRepository.create(receivedMaterial);
         const receivedMaterialCreated = await receivedMaterialRepository.save(newReceivedMaterial);
 
-        const savePromises = receivedMaterialsDetail.map(detail => {
+        const savePromises = receivedMaterialsDetail.map(detail => 
+        {
             detail.receivedMaterial = receivedMaterialCreated;
             return receivedMaterialDetailRepository.save(detail);
         });

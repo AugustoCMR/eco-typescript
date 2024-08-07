@@ -1,4 +1,4 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne, OneToMany } from "typeorm";
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, OneToOne, OneToMany } from "typeorm";
 import { Residue } from "./residueModel";
 import { ReceivedMaterialDetail } from "./receivedMaterialDetailModel";
 
