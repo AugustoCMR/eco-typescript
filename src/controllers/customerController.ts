@@ -1,6 +1,8 @@
 import { Request, Response } from "express";
 import { customerRepository } from "../repositories/customerRepository"
 import { CustomerService } from "../service/customerService";
+import { AppDataSource } from "../data-source";
+import { Customer } from "../models/customerModel";
 
 export class CustomerController 
 {
@@ -56,7 +58,7 @@ export class CustomerController
         }
     };
 
-    async getAllCustomers(req: Request, res: Response) {
+    async getAllCustomers (req: Request, res: Response) {
         try 
         {
         const customers = await customerRepository.find();
@@ -69,7 +71,7 @@ export class CustomerController
         res.status(500).json({ error: error });
         }
     }
-    async getCustomerById(req: Request, res: Response) {
+    async getCustomerById (req: Request, res: Response) {
         try 
         {
             const code = parseInt(req.params.id);
@@ -85,6 +87,25 @@ export class CustomerController
         {
             console.error("Erro ao buscar cliente:", error);
             res.status(500).json({ error: error });
+        }
+    }
+
+    async extract (req: Request, res: Response)
+    {
+        try 
+        {
+            const extract = await AppDataSource.getRepository(Customer)
+            .createQueryBuilder('customer')
+            .innerJoinAndSelect('customer.receivedMaterials', 'receivedMaterials')
+            .innerJoinAndSelect('customer.removeProductOperation', 'removeProductOperation')
+            .getMany();
+
+            res.json(extract);
+        } 
+        catch (error) 
+        {
+            console.error("Erro gerar consulta:", error);
+            res.status(500).json({ error: error});
         }
     }
 }

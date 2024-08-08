@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { MaterialService } from '../service/materialService';
 import { materialRepository } from '../repositories/materialRepository';
+import { AppDataSource } from '../data-source';
+import { Customer } from '../models/customerModel';
 
 export class MaterialController
 {
@@ -108,6 +110,26 @@ export class MaterialController
         catch (error) 
         {
             console.error("Erro ao cadastrar recebimento de materiais:", error);
+            res.status(500).json({ error: error});
+        }
+    }
+
+    async detailedMaterialFetch (req: Request, res: Response)
+    {
+        try 
+        {
+           
+            const materials = await AppDataSource.getRepository(Customer)
+            .createQueryBuilder('customer')
+            .innerJoinAndSelect('customer.receivedMaterials', 'receivedMaterials')
+            .innerJoinAndSelect('receivedMaterials.receivedMaterialsDetail', 'receivedMaterialsDetail')
+            .getMany();
+            
+            res.json(materials);
+        } 
+        catch (error) 
+        {
+            console.error("Erro gerar consulta:", error);
             res.status(500).json({ error: error});
         }
     }
