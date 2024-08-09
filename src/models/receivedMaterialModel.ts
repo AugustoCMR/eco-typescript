@@ -1,4 +1,4 @@
-import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from "typeorm";
+import { Entity, BaseEntity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, CreateDateColumn } from "typeorm";
 import { Customer } from "./customerModel";
 import { ReceivedMaterialDetail } from "./receivedMaterialDetailModel";
 
@@ -10,6 +10,9 @@ export class ReceivedMaterial extends BaseEntity
 
     @Column( { unique: true} )
     codigo: number;
+
+    @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    created_at: Date;
 
     @Column("float")
     ecoSaldoTotal: number;

@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany } from "typeorm";
+import { BaseEntity, Column, Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany, CreateDateColumn } from "typeorm";
 import { Product } from "./productModel";
 import { Customer } from "./customerModel";
 import { RemoveProductOperationDetail } from "./removeProductOperationDetailModel";
@@ -11,6 +11,9 @@ export class RemoveProductOperation extends BaseEntity
 
     @Column({ unique: true })
     codigo: number
+
+    @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+    created_at: Date;
 
     @ManyToOne(() => Customer, customer => customer.removeProductOperation)
     usuario: Customer;
