@@ -93,12 +93,53 @@ export class CustomerController
     async extract (req: Request, res: Response)
     {
         try 
-        {
-            const extract = await AppDataSource.getRepository(Customer)
-            .createQueryBuilder('customer')
-            .innerJoinAndSelect('customer.receivedMaterials', 'receivedMaterials')
-            .innerJoinAndSelect('customer.removeProductOperation', 'removeProductOperation')
-            .getMany();
+        {   
+            const customerId = parseInt(req.params.id);
+
+            const extract = await AppDataSource.query(`
+                SELECT 
+                    ct.nome, 
+                    ct.ecosaldo,
+                    mt.nome AS item,
+                    rm."ecoSaldoTotal",
+                    rme.subtotal AS Entrada,
+                    NULL AS Saida,  
+                    rm.created_at
+                FROM 
+                    customer AS ct
+                INNER JOIN 
+                    received_material AS rm ON ct.id = rm."customerId"
+                INNER JOIN
+                    received_material_detail AS rme ON rm.id = rme."receivedMaterialId"
+                INNER JOIN
+                    material AS mt ON mt.id = rme."materialId"
+                WHERE
+                    ct.id = $1
+
+                UNION ALL
+
+                SELECT 
+                    ct.nome, 
+                    ct.ecosaldo,
+                    pd.nome AS item,
+                    rpo."ecoSaldoTotal",
+                    NULL AS Entrada,  
+                    rpod.subtotal AS Saida,
+                    rpo.created_at
+                FROM 
+                    customer AS ct
+                INNER JOIN 
+                    remove_product_operation AS rpo ON ct.id = rpo."usuarioId"
+                INNER JOIN
+                    remove_product_operation_detail AS rpod ON rpo.id = rpod."removeProductOperationId"
+                INNER JOIN
+                    product AS pd ON rpod."produtoId" = pd.id
+                WHERE 
+                    ct.id = $1
+
+                ORDER BY 
+                    created_at DESC;
+            `, [customerId]);
 
             res.json(extract);
         } 
