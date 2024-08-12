@@ -65,10 +65,14 @@ export class ProductService
         const newRemoveProductOperation = removeProductOperationRepository.create(removeProductOperation);
         const removeProductOperationCreated = await removeProductOperationRepository.save(newRemoveProductOperation);
 
-        const customer = await customerRepository.findOneBy({id: removeProductOperationCreated.usuario.id});
+        const customer = await customerRepository.findOneBy({id: removeProductOperationCreated.usuario.codigo});
+
+        let saldoAtual = 0;
 
         if(customer)
         {   
+
+            saldoAtual = customer.ecosaldo;
 
             customer.ecosaldo -= Number(removeProductOperationCreated.ecoSaldoTotal);
 
@@ -83,9 +87,12 @@ export class ProductService
             if(product)
             {
                 product.quantidade -= detail.quantidade;
-
                 await productRepository.save(product);
             }
+
+            saldoAtual -= detail.subtotal;
+            
+            detail.saldoAtualCustomer = saldoAtual;
 
             detail.removeProductOperation = removeProductOperationCreated;
             return removeProductOperationDetailRepository.save(detail);

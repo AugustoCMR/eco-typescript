@@ -22,4 +22,7 @@ export class RemoveProductOperationDetail extends BaseEntity
 
     @ManyToOne(() => RemoveProductOperation, removeProductOperation => removeProductOperation.removeProductOperationDetail)
     removeProductOperation: RemoveProductOperation;
+
+    @Column("float")
+    saldoAtualCustomer: number;
 }
