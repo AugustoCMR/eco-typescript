@@ -103,6 +103,7 @@ export class CustomerController
                     mt.nome AS item,
                     rm."ecoSaldoTotal",
                     rme.subtotal AS Entrada,
+                    rme."saldoAtualCustomer",
                     NULL AS Saida,  
                     rm.created_at
                 FROM 
@@ -125,6 +126,7 @@ export class CustomerController
                     rpo."ecoSaldoTotal",
                     NULL AS Entrada,  
                     rpod.subtotal AS Saida,
+                    rpod."saldoAtualCustomer",
                     rpo.created_at
                 FROM 
                     customer AS ct

@@ -23,4 +23,7 @@ export class ReceivedMaterialDetail extends BaseEntity
 
     @ManyToOne(() => Material, material => material.receivedMaterialDetail)
     material: Material;
+
+    @Column("float")
+    saldoAtualCustomer: number;
 }

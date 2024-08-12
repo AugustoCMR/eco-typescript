@@ -46,16 +46,27 @@ export class MaterialService
 
         const customer = await customerRepository.findOneBy({id: receivedMaterialCreated.customer.id});
 
+        let saldoAtual = 0;
+
         if(customer)
         {   
+
+            saldoAtual = customer.ecosaldo;
 
             customer.ecosaldo += Number(receivedMaterialCreated.ecoSaldoTotal);
 
             await customerRepository.save(customer);
         }
 
+        console.log('salod atual:  ' + saldoAtual);
+
+
         const savePromises = receivedMaterialsDetail.map(detail => 
         {
+
+            saldoAtual += detail.subtotal;
+            detail.saldoAtualCustomer = saldoAtual;
+
             detail.receivedMaterial = receivedMaterialCreated;
             return receivedMaterialDetailRepository.save(detail);
         });
