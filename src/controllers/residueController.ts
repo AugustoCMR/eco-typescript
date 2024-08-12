@@ -16,7 +16,7 @@ export class ResidueController
     {
         try
         {
-            await this.residueService.createResidue(req.body);
+            await this.residueService.createResidue(req.body.residue);
 
             res.status(201).json({ message: 'Resíduo cadastrado com sucesso'});
         }
@@ -32,7 +32,7 @@ export class ResidueController
         try 
         {
             const code = parseInt(req.params.id);
-            await this.residueService.updateResidue(code, req.body);
+            await this.residueService.updateResidue(code, req.body.residue);
 
             res.status(201).json( {message: "Usuário atualizado com sucesso"} );
         } 

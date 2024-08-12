@@ -15,7 +15,7 @@ export class CustomerController
     createCustomer = async (req: Request, res: Response) => {
         try 
         {
-        await this.customerService.createCustomer(req.body);
+        await this.customerService.createCustomer(req.body.customer);
 
         res.status(201).json({ message: "Usuário cadastrado com sucesso!" });
 
@@ -31,7 +31,7 @@ export class CustomerController
         try 
         {
             const code = parseInt(req.params.id);
-            await this.customerService.updateCustomer(code, req.body);
+            await this.customerService.updateCustomer(code, req.body.customer);
 
             res.status(201).json({ message: "Usuário atualizado com sucesso!" });
 

@@ -17,7 +17,7 @@ export class MaterialController
     {
         try 
         {
-            await this.materialService.createMaterial(req.body);
+            await this.materialService.createMaterial(req.body.material);
 
             res.status(201).json({ message: 'Material cadastrado com sucesso' });
         } 
@@ -33,7 +33,7 @@ export class MaterialController
         try 
         {
             const code = parseInt(req.params.id);
-            await this.materialService.updateMaterial(code, req.body);
+            await this.materialService.updateMaterial(code, req.body.material);
             
             res.status(201).json( {message: "Material atualizado com sucesso"} )
         } 

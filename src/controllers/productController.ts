@@ -15,7 +15,7 @@ export class ProductController
     {
         try
         {
-            await this.productService.createProduct(req.body);
+            await this.productService.createProduct(req.body.product);
 
             res.status(201).json({ message: 'Produto cadastrado com sucesso' });
         }
@@ -31,7 +31,7 @@ export class ProductController
         try 
         {
             const code = parseInt(req.params.id);
-            await this.productService.updateProduct(code, req.body);
+            await this.productService.updateProduct(code, req.body.product);
 
             res.status(201).json( {message: "Produto atualizado com sucesso"} )
         } 
