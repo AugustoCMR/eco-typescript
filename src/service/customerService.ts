@@ -1,6 +1,7 @@
 import { Customer } from "../models/customerModel";
 import { customerRepository } from "../repositories/customerRepository";
 import { CodeGenerator } from "../utils/codeGenerator";
+import { customerSchema } from "../validators/customerValidator";
 
 export class CustomerService 
 {
@@ -9,8 +10,10 @@ export class CustomerService
     {
         let code: number = await new CodeGenerator().generateCode("customer");
 
-        customer.codigo = code;
-        const newCustomer = customerRepository.create(customer);
+        const validatedData = customerSchema.parse(customer);
+
+        validatedData.codigo = code;
+        const newCustomer = customerRepository.create(validatedData);
         await customerRepository.save(newCustomer);
     }
 
@@ -29,4 +32,5 @@ export class CustomerService
     {
         await customerRepository.delete({ codigo: code });
     }
+
 }

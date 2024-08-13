@@ -17,11 +17,11 @@ export class Customer extends BaseEntity
     @Column({ length: 40, unique: true })
     email: string;
 
-    @Column("float", {default: 0})
+    @Column("float", {default: 0, nullable: true})
     ecosaldo: number;
 
     @Column({ unique: true })
-    cpf: number;
+    cpf: string;
 
     @Column({ length: 20 })
     pais: string;
@@ -33,7 +33,7 @@ export class Customer extends BaseEntity
     cidade: string;
 
     @Column()
-    cep: number;
+    cep: string;
 
     @Column({ length: 50 })
     rua: string;
