@@ -1,6 +1,7 @@
 import { Residue } from "../models/residueModel";
 import { residueRepository } from "../repositories/residueRepository";
 import { CodeGenerator } from "../utils/codeGenerator";
+import { residueSchema } from "../validators/residueValidator";
 
 export class ResidueService
 {
@@ -8,8 +9,10 @@ export class ResidueService
     {   
         let code: number = await new CodeGenerator().generateCode("residue");
 
-        residue.codigo = code;
-        const newResidue = residueRepository.create(residue);
+        const validatedData = residueSchema.parse(residue);
+
+        validatedData.codigo = code;
+        const newResidue = residueRepository.create(validatedData);
         await residueRepository.save(newResidue);
     }
 

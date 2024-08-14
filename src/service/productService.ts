@@ -8,6 +8,7 @@ import { productRepository } from "../repositories/productRepository";
 import { removeProductOperationDetailRepository } from "../repositories/removeProductOperationDetailRepository";
 import { removeProductOperationRepository } from "../repositories/removeProductOperationRepository";
 import { CodeGenerator } from "../utils/codeGenerator";
+import { productSchema } from "../validators/productValidator";
 
 export class ProductService
 {
@@ -15,8 +16,10 @@ export class ProductService
     {
         let code: number = await new CodeGenerator().generateCode("product");
 
-        product.codigo = code;
-        const newProduct = productRepository.create(product);
+        const validatedData = productSchema.parse(product);
+
+        validatedData.codigo = code;
+        const newProduct = productRepository.create(validatedData);
         await productRepository.save(newProduct);
     }
 

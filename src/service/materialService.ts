@@ -5,7 +5,9 @@ import { customerRepository } from "../repositories/customerRepository";
 import { materialRepository } from "../repositories/materialRepository";
 import { receivedMaterialDetailRepository } from "../repositories/receivedMaterialDetailRepository";
 import { receivedMaterialRepository } from "../repositories/receivedMaterialRepository";
+import { residueRepository } from "../repositories/residueRepository";
 import { CodeGenerator } from "../utils/codeGenerator";
+import { materialSchema } from "../validators/materialValidator";
 
 export class MaterialService
 {
@@ -13,8 +15,24 @@ export class MaterialService
     {
         let code: number = await new CodeGenerator().generateCode("material");
 
-        material.codigo = code;
-        const newMaterial = materialRepository.create(material);
+        const validatedData = materialSchema.parse(material);
+
+        validatedData.codigo = code;
+
+        const residue = await residueRepository.findOneBy({id: validatedData.residue});
+
+        if (!residue) {
+            throw new Error("Resíduo não encontrado");
+        }
+
+        const newMaterial = materialRepository.create
+        (   
+            {
+                ...validatedData,
+                residue: residue   
+            }  
+        );   
+
         await materialRepository.save(newMaterial);
     }
 
