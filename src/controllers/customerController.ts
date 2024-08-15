@@ -15,15 +15,15 @@ export class CustomerController
     createCustomer = async (req: Request, res: Response) => {
         try 
         {
-        await this.customerService.createCustomer(req.body.customer);
+            await this.customerService.createCustomer(req.body.customer);
 
-        res.status(201).json({ message: "Usuário cadastrado com sucesso!" });
+            res.status(201).json({ message: "Usuário cadastrado com sucesso!" });
 
         } 
         catch (error) 
         {
-        console.error("Erro ao criar cliente:", error);
-        res.status(400).json({ error: error });
+            console.error("Erro ao criar cliente:", error);
+            res.status(400).json({ error: error });
         }
     };
 
