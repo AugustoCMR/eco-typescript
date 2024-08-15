@@ -83,14 +83,8 @@ export class MaterialController
             const code = parseInt(req.params.id);
             const material = await materialRepository.findOneBy({codigo: code});
 
-            if(material)
-            {
-                res.json(material);
-            }
-            else
-            {
-                res.status(404).json({ message: 'Material não encontrado'});
-            }
+          
+            res.json(material);  
         } 
         catch (error) 
         {

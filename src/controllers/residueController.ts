@@ -81,14 +81,7 @@ export class ResidueController
             const code = parseInt(req.params.id);
             const residue = await residueRepository.findOneBy({ codigo: code });
             
-            if(residue)
-            {
-                res.json(residue);
-            }
-            else
-            {
-                res.status(404).json({ message: 'Resíduo não encontrado' });
-            }
+            res.json(residue); 
         } 
         catch (error) 
         {

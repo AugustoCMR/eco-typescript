@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
 import { customerRepository } from "../repositories/customerRepository";
-
 export async function validateCPF(req: Request, res: Response, next: NextFunction)
 {
     try 
@@ -18,6 +17,7 @@ export async function validateCPF(req: Request, res: Response, next: NextFunctio
     } 
     catch (error) 
     {
+        console.error('Erro ao validar cpf:', error);
         return res.status(500).json({mensagem: `Ocorreu um erro interno do servidor: ${error}`});
     }
       
@@ -40,6 +40,7 @@ export async function validateEmail(req: Request, res: Response, next: NextFunct
     } 
     catch (error) 
     {
+        console.error('Erro ao validar e-mail:', error);
         return res.status(500).json({mensagem: `Ocorreu um erro interno do servidor: ${error}`});
     }
 }
