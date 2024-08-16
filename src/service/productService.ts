@@ -67,8 +67,8 @@ export class ProductService
 
         const newRemoveProductOperation = removeProductOperationRepository.create(removeProductOperation);
         const removeProductOperationCreated = await removeProductOperationRepository.save(newRemoveProductOperation);
-
-        const customer = await customerRepository.findOneBy({id: removeProductOperationCreated.usuario.codigo});
+    
+        const customer = await customerRepository.findOneBy({codigo: removeProductOperationCreated.usuario.codigo});
 
         let saldoAtual = 0;
 

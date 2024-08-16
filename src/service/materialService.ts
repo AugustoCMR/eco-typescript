@@ -62,7 +62,7 @@ export class MaterialService
         const newReceivedMaterial = receivedMaterialRepository.create(receivedMaterial);
         const receivedMaterialCreated = await receivedMaterialRepository.save(newReceivedMaterial);
 
-        const customer = await customerRepository.findOneBy({id: receivedMaterialCreated.customer.id});
+        const customer = await customerRepository.findOneBy({codigo: receivedMaterialCreated.customer.id});
 
         let saldoAtual = 0;
 
