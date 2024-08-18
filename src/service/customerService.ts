@@ -1,6 +1,7 @@
 import { Customer } from "../models/customerModel";
 import { customerRepository } from "../repositories/customerRepository";
 import { CodeGenerator } from "../utils/codeGenerator";
+import { validateIdParam } from "../utils/validations";
 import { customerSchema } from "../validators/customerValidator";
 
 export class CustomerService 
@@ -8,9 +9,9 @@ export class CustomerService
 
     async createCustomer(customer: Customer) 
     {
-        let code: number = await new CodeGenerator().generateCode("customer");
-
         const validatedData = customerSchema.parse(customer);
+
+        let code: number = await new CodeGenerator().generateCode("customer");
 
         validatedData.codigo = code;
         const newCustomer = customerRepository.create(validatedData);
@@ -19,18 +20,33 @@ export class CustomerService
 
     async updateCustomer(code: number, customer: Customer) 
     {
+        const validatedData = customerSchema.parse(customer);
+        
+        await validateIdParam(customerRepository, "usuário", code);
+
         await customerRepository.update
         (   
             {codigo: code},
             {
-                ...customer
+                ...validatedData
             }   
         );
     }
 
     async deleteCustomer(code: number) 
     {
+        // validateIdParam(customerRepository, "usuário");
         await customerRepository.delete({ codigo: code });
+    }
+
+    async getCustomerById(code: number)
+    {
+        
+        await validateIdParam(customerRepository, "usuário", code);
+
+        const customer = await customerRepository.findOneBy({ codigo: code });
+
+        return customer;
     }
 
 }

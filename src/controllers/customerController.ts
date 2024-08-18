@@ -39,54 +39,53 @@ export class CustomerController
         catch (error) 
         {
             console.error("Erro ao atualizar cliente:", error);
-            res.status(400).json({ error: error });
+        
+            const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+            res.status(500).json({ error: errorMessage });
         }
     };
 
     deleteCustomer = async (req: Request, res: Response) => {
         try 
         {
-        const code = parseInt(req.params.id);
-        await this.customerService.deleteCustomer(code);
+            const code = parseInt(req.params.id);
+            await this.customerService.deleteCustomer(code);
 
-        res.status(204).send();
+            res.status(204).send();
         } 
         catch (error) 
         {
-        console.error("Erro ao deletar cliente:", error);
-        res.status(400).json({ error: error });
+            const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+            res.status(500).json({ error: errorMessage });
         }
     };
 
     async getAllCustomers (req: Request, res: Response) {
         try 
         {
-        const customers = await customerRepository.find();
+            const customers = await customerRepository.find();
 
-        res.json(customers);
+            res.json(customers);
         } 
         catch (error) 
         {
-        console.error("Erro ao buscar clientes:", error);
-        res.status(500).json({ error: error });
+            console.error("Erro ao buscar clientes:", error);
+            res.status(500).json({ error: error });
         }
     }
-    async getCustomerById (req: Request, res: Response) {
-        try 
+
+    getCustomerById = async (req: Request, res: Response) =>
+    {   try 
         {
             const code = parseInt(req.params.id);
-            const customer = await customerRepository.findOneBy({ codigo: code });
-
-            if (customer) {
-                res.json(customer);
-            } else {
-                res.status(404).json({ message: "Usuário não encontrado" });
-            }
+            const customer = await this.customerService.getCustomerById(code);
+            
+            res.json(customer);
         } 
         catch (error) 
         {
-            console.error("Erro ao buscar cliente:", error);
-            res.status(500).json({ error: error });
+            const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+            res.status(500).json({ error: errorMessage });
         }
     }
 
