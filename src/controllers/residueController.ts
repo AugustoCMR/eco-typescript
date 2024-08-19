@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ResidueService } from "../service/residueService"
 import { residueRepository } from '../repositories/residueRepository';
+import { ZodError } from 'zod';
 
 export class ResidueController
 {   
@@ -23,7 +24,15 @@ export class ResidueController
         catch(error)
         {
             console.error("Erro ao criar resíduo:", error);
-            res.status(400).json({ error: error });
+
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
         }
     }
 
@@ -31,7 +40,7 @@ export class ResidueController
     {
         try 
         {
-            const code = parseInt(req.params.id);
+            const code = req.params.id;
             await this.residueService.updateResidue(code, req.body.residue);
 
             res.status(201).json( {message: "Usuário atualizado com sucesso"} );
@@ -39,7 +48,15 @@ export class ResidueController
         catch (error) 
         {
             console.error("Erro ao atualizar resíduo:", error);
-            res.status(400).json({ error: error });
+            
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
         }
     }
 
@@ -47,15 +64,21 @@ export class ResidueController
     {
         try 
         {
-            const code = parseInt(req.params.id);
+            const code = req.params.id;
             await this.residueService.deleteResidue(code);
 
             res.status(204).send();
         } 
         catch (error) 
         {
-            console.error("Erro ao deletar resíduo:", error);
-            res.status(400).json({ error: error });
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
         }
     }
 

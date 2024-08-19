@@ -3,7 +3,7 @@ import { Customer } from "../models/customerModel";
 import { customerRepository } from "../repositories/customerRepository";
 import { receivedMaterialRepository } from "../repositories/receivedMaterialRepository";
 import { CodeGenerator } from "../utils/codeGenerator";
-import { validateIdParam } from "../utils/validations";
+import { validateDelete, validateIdParam } from "../utils/validations";
 import { customerSchema } from "../validators/customerValidator";
 import { idSchema } from "../validators/idValidator";
 
@@ -30,8 +30,6 @@ export class CustomerService
 
         const validatedData = customerSchema.parse(customer);
         
-        await validateIdParam(customerRepository, "usuário", idValidated);
-
         await customerRepository.update
         (   
             {codigo: idValidated},
@@ -47,7 +45,7 @@ export class CustomerService
 
         const customer = await validateIdParam(customerRepository, "usuário", idValidated);
 
-        await this.validateDeleteCustomer(customer);
+        await validateDelete(receivedMaterialRepository, {customer: customer}, "usuário");
 
         await customerRepository.delete({ codigo: idValidated });
     }
@@ -133,17 +131,6 @@ export class CustomerService
         if(checkEmail)
         {
             throw new Error("O E-mail informado já possuí cadastro");
-        }
-    }
-
-    async validateDeleteCustomer(customer: Customer)
-    {   
-        
-        const checkCustomer = await receivedMaterialRepository.findOneBy({customer});
-
-        if(checkCustomer)
-        {
-            throw new Error("Não é possível deletar um usuário que possui registros.");
         }
     }
 }
