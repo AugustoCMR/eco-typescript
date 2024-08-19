@@ -3,6 +3,7 @@ import { customerRepository } from "../repositories/customerRepository"
 import { CustomerService } from "../service/customerService";
 import { AppDataSource } from "../data-source";
 import { Customer } from "../models/customerModel";
+import { ZodError } from "zod";
 
 export class CustomerController 
 {
@@ -21,42 +22,59 @@ export class CustomerController
 
         } 
         catch (error) 
-        {
-            console.error("Erro ao criar cliente:", error);
-            res.status(400).json({ error: error });
+        {   
+            console.error("Erro ao cadastrar cliente:", error);
+
+            error instanceof Error ?  res.status(400).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+           
         }
     };
 
     updateCustomer = async (req: Request, res: Response) => {
         try 
         {
-            const code = parseInt(req.params.id);
+            const code = req.params.id;
             await this.customerService.updateCustomer(code, req.body.customer);
 
-            res.status(201).json({ message: "Usuário atualizado com sucesso!" });
+            res.status(200).json({ message: "Usuário atualizado com sucesso!" });
 
         } 
         catch (error) 
         {
             console.error("Erro ao atualizar cliente:", error);
         
-            const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-            res.status(500).json({ error: errorMessage });
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
         }
     };
 
-    deleteCustomer = async (req: Request, res: Response) => {
+    deleteCustomer = async (req: Request, res: Response) => 
+    {
         try 
         {
-            const code = parseInt(req.params.id);
+            const code = req.params.id;
             await this.customerService.deleteCustomer(code);
 
             res.status(204).send();
         } 
         catch (error) 
         {
-            const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-            res.status(500).json({ error: errorMessage });
+            console.error("Erro ao deletar cliente:", error);
+
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(400).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
         }
     };
 
@@ -70,84 +88,56 @@ export class CustomerController
         catch (error) 
         {
             console.error("Erro ao buscar clientes:", error);
-            res.status(500).json({ error: error });
+
+            error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
         }
     }
 
     getCustomerById = async (req: Request, res: Response) =>
     {   try 
         {
-            const code = parseInt(req.params.id);
+            const code = req.params.id;
             const customer = await this.customerService.getCustomerById(code);
             
             res.json(customer);
         } 
         catch (error) 
-        {
-            const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-            res.status(500).json({ error: errorMessage });
+        {   
+            console.error("Erro ao buscar cliente:", error);
+
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
         }
     }
 
-    async extract (req: Request, res: Response)
+    extract = async( req: Request, res: Response) =>
     {
         try 
         {   
-            const customerId = parseInt(req.params.id);
-
-            const extract = await AppDataSource.query(`
-                SELECT 
-                    ct.nome, 
-                    ct.ecosaldo,
-                    mt.nome AS item,
-                    rm."ecoSaldoTotal",
-                    rme.subtotal AS Entrada,
-                    rme."saldoAtualCustomer",
-                    NULL AS Saida,  
-                    rm.created_at
-                FROM 
-                    customer AS ct
-                INNER JOIN 
-                    received_material AS rm ON ct.id = rm."customerId"
-                INNER JOIN
-                    received_material_detail AS rme ON rm.id = rme."receivedMaterialId"
-                INNER JOIN
-                    material AS mt ON mt.id = rme."materialId"
-                WHERE
-                    ct.id = $1
-
-                UNION ALL
-
-                SELECT 
-                    ct.nome, 
-                    ct.ecosaldo,
-                    pd.nome AS item,
-                    rpo."ecoSaldoTotal",
-                    NULL AS Entrada,  
-                    rpod.subtotal AS Saida,
-                    rpod."saldoAtualCustomer",
-                    rpo.created_at
-                FROM 
-                    customer AS ct
-                INNER JOIN 
-                    remove_product_operation AS rpo ON ct.id = rpo."usuarioId"
-                INNER JOIN
-                    remove_product_operation_detail AS rpod ON rpo.id = rpod."removeProductOperationId"
-                INNER JOIN
-                    product AS pd ON rpod."produtoId" = pd.id
-                WHERE 
-                    ct.id = $1
-
-                ORDER BY 
-                    created_at DESC;
-            `, [customerId]);
-
+            const customerId = req.params.id;
+            const extract = await this.customerService.extract(customerId);
+           
             res.json(extract);
         } 
         catch (error) 
         {
             console.error("Erro gerar consulta:", error);
-            res.status(500).json({ error: error});
+
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
+           
         }
     }
 }

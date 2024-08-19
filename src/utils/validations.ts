@@ -9,4 +9,7 @@ export async function validateIdParam(repository: Repository<any>, entityName: s
     {
         throw new Error(`O ID do ${entityName} náo foi encontrado`);
     }  
+
+    return item;
 }
+
