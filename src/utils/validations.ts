@@ -1,4 +1,4 @@
-import { Repository } from "typeorm";
+import { Repository, Not } from "typeorm";
 
 export async function validateIdParam(repository: Repository<any>, entityName: string, code: number) 
 {
@@ -7,15 +7,37 @@ export async function validateIdParam(repository: Repository<any>, entityName: s
 
     if (!item) 
     {
-        throw new Error(`O ID do ${entityName} náo foi encontrado`);
+        throw new Error(`O ID do ${entityName} não foi encontrado`);
     }  
 
     return item;
 }
 
-export async function validateEntityName(repository: Repository<any>, entityName: string,  nameEntered: string, nameColumnModel: string)
+export async function validateEntityName(repository: Repository<any>, entityName: string,  nameEntered: string, nameColumnModel: string, code?: number)
 {
-    const checkName = await repository.findOneBy({ [nameColumnModel]: nameEntered });
+
+    let checkName;
+
+    if(code)
+    {
+        checkName = await repository.findOne(
+        {
+            where: 
+            {
+                [nameColumnModel]: nameEntered,
+                codigo: Not(code)
+            }
+        });
+    }
+    else
+    {
+        checkName = await repository.findOneBy(
+            {
+                [nameColumnModel]: nameEntered
+            }
+        )
+    }
+   
 
     if (checkName) 
     {
@@ -33,4 +55,17 @@ export async function validateDelete (repository: Repository<any>, objectEntity:
         throw new Error(`Não é possível deletar um ${entityName} que possui registros.`);
     }
 }
+
+export async function validateIdBody(repository: Repository<any>, code: number, columnName: string)
+{
+    const item = await repository.findOneBy({ codigo: code });
+
+    if (!item) 
+    {
+        throw new Error(`${columnName} não foi encontrado`);
+    }
+
+    return item;
+}
+
 
