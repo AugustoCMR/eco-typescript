@@ -12,20 +12,13 @@ export const materialSchema = z.object
                 required_error: "O campo Eco Points é obrigatório",
                 invalid_type_error: "O campo Eco Points deve conter apenas números"
             }
-        ),
+        ).positive("O campo Eco Points deve conter um valor maior que zero"),
         residue: z.number
         (
             {
                 required_error: "O campo resíduo é obrigatório",
                 invalid_type_error: "O campo resíduo deve conter apenas números"
             }
-        ),
-        quantidade: z.number
-        (
-            {
-                required_error: "O campo quantidade é obrigatório",
-                invalid_type_error: "O campo quantidade deve conter apenas números"
-            }
-        )
+        ).int("O campo resíduo deve conter apenas números inteiros")
     }
 )

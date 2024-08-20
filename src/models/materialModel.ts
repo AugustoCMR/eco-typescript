@@ -20,7 +20,7 @@ export class Material extends BaseEntity
     @Column("float")
     ecopoint:  number;
 
-    @Column()
+    @Column({default: 0, nullable: true})
     quantidade: number;
 
     @ManyToOne(() => Residue, residue => residue.materials)

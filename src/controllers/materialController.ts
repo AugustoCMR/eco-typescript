@@ -3,6 +3,7 @@ import { MaterialService } from '../service/materialService';
 import { materialRepository } from '../repositories/materialRepository';
 import { AppDataSource } from '../data-source';
 import { Customer } from '../models/customerModel';
+import { ZodError } from 'zod';
 
 export class MaterialController
 {
@@ -24,7 +25,16 @@ export class MaterialController
         catch (error) 
         {
             console.error("Erro ao criar material:", error);
-            res.status(400).json({ error: error });
+            
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
+
         }
     }
 
@@ -32,7 +42,7 @@ export class MaterialController
     {
         try 
         {
-            const code = parseInt(req.params.id);
+            const code = req.params.id;
             await this.materialService.updateMaterial(code, req.body.material);
             
             res.status(201).json( {message: "Material atualizado com sucesso"} )
@@ -40,15 +50,23 @@ export class MaterialController
         catch (error) 
         {
             console.error("Erro ao atualizar material:", error);
-            res.status(400).json({ error: error });
-        }
+            
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
+    }
     }
 
     deleteMaterial = async (req: Request, res: Response) =>
     {
         try 
         {
-            const code = parseInt(req.params.id);
+            const code = req.params.id;
             await this.materialService.deleteMaterial(code);
 
             res.status(204).send();
@@ -56,7 +74,15 @@ export class MaterialController
         catch (error) 
         {
             console.error("Erro ao deletar material:", error);
-            res.status(400).json({ error: error });
+           
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
         }
 
     }

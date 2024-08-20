@@ -7,23 +7,21 @@ import { receivedMaterialDetailRepository } from "../repositories/receivedMateri
 import { receivedMaterialRepository } from "../repositories/receivedMaterialRepository";
 import { residueRepository } from "../repositories/residueRepository";
 import { CodeGenerator } from "../utils/codeGenerator";
+import { validateDelete, validateEntityName, validateIdBody, validateIdParam } from "../utils/validations";
+import { idSchema } from "../validators/idValidator";
 import { materialSchema } from "../validators/materialValidator";
 
 export class MaterialService
 {
     async createMaterial(material: Material)
     {
+        const validatedData = materialSchema.parse(material);
+        await validateEntityName(materialRepository, 'Material', validatedData.nome, 'nome');
+        const residue = await validateIdBody(residueRepository, validatedData.residue, "Resíduo");
+
         let code: number = await new CodeGenerator().generateCode("material");
 
-        const validatedData = materialSchema.parse(material);
-
         validatedData.codigo = code;
-
-        const residue = await residueRepository.findOneBy({id: validatedData.residue});
-
-        if (!residue) {
-            throw new Error("Resíduo não encontrado");
-        }
 
         const newMaterial = materialRepository.create
         (   
@@ -33,23 +31,40 @@ export class MaterialService
             }  
         );   
 
-        await materialRepository.save(newMaterial);
+        await materialRepository.save(newMaterial); 
     }
 
-    async updateMaterial(code: number, material: Material)
-    {
+    async updateMaterial(code: string, material: Material)
+    {   
+        
+        const idValidated = parseInt(idSchema.parse(code));
+        
+        await validateIdParam(materialRepository, "material", idValidated);
+       
+        const validatedData = materialSchema.parse(material);
+
+        await validateEntityName(materialRepository, 'Material', validatedData.nome, 'nome'), idValidated;
+
+        const residue = await validateIdBody(residueRepository, validatedData.residue, "Resíduo");
+        
         await materialRepository.update
         (
-            {codigo: code},
+            {codigo: idValidated},
             {
-                ...material
+                ...validatedData,
+                residue
             }
         )
     }
 
-    async deleteMaterial(code: number)
-    {
-        await materialRepository.delete({ codigo: code });
+    async deleteMaterial(code: string)
+    {   
+        const idValidated = parseInt(idSchema.parse(code));
+        const material = await validateIdParam(materialRepository, "material", idValidated);
+
+        await validateDelete(receivedMaterialDetailRepository, {material: material}, "material");
+
+        await materialRepository.delete({ codigo: idValidated });
       
     }
 
