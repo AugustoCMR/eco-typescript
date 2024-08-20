@@ -70,7 +70,10 @@ export class ResidueController
             res.status(204).send();
         } 
         catch (error) 
-        {
+        {   
+
+            console.error("Erro ao deletar resíduo:", error);
+
             if(error instanceof ZodError)
             {
                 res.status(400).json({ error: error.issues[0].message })
@@ -97,19 +100,27 @@ export class ResidueController
         }
     }
 
-    async getResidueById(req: Request, res: Response)
+    getResidueById = async (req: Request, res: Response) =>
     {
         try 
         {
-            const code = parseInt(req.params.id);
-            const residue = await residueRepository.findOneBy({ codigo: code });
-            
+            const code = req.params.id;
+            const residue = await this.residueService.getResidueById(code);
+ 
             res.json(residue); 
         } 
         catch (error) 
         {
             console.error("Erro ao buscar resíduo:", error);
-            res.status(500).json({ error: error});
+           
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
         }
     }
 }   
