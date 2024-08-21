@@ -7,9 +7,10 @@ import { receivedMaterialDetailRepository } from "../repositories/receivedMateri
 import { receivedMaterialRepository } from "../repositories/receivedMaterialRepository";
 import { residueRepository } from "../repositories/residueRepository";
 import { CodeGenerator } from "../utils/codeGenerator";
-import { validateDelete, validateEntityName, validateIdBody, validateIdParam } from "../utils/validations";
+import { validateDelete, validateEntityName, validateIdBody, validateIdParam} from "../utils/validations";
 import { idSchema } from "../validators/idValidator";
 import { materialSchema } from "../validators/materialValidator";
+import { schemaMasterDetail, TypeMasterDetail } from "../validators/receivedMaterialValidator";
 
 export class MaterialService
 {
@@ -68,40 +69,60 @@ export class MaterialService
       
     }
 
-    async receivedMaterial(receivedMaterial: ReceivedMaterial, receivedMaterialsDetail: ReceivedMaterialDetail[])
-    {
+    async getMaterialById (code: string)
+    {   
+        const idValidated = parseInt(idSchema.parse(code));
+
+        await validateIdParam(materialRepository, "material", idValidated);
+
+        const material = await materialRepository.findOneBy({codigo: idValidated});
+
+        return material;
+    }
+
+    async receivedMaterial(body: TypeMasterDetail)
+    {   
+        const validatedData = schemaMasterDetail.parse(body);
+        
+        let idMaterial;
+        let material;
+
+        const idCustomer = Number(validatedData.master.customer);
+
+        const customer = await validateIdBody(customerRepository, idCustomer, "Usuário");
+
         let code: number = await new CodeGenerator().generateCode("received_material");
 
-        receivedMaterial.codigo = code;
-
-        const newReceivedMaterial = receivedMaterialRepository.create(receivedMaterial);
+        validatedData.master.codigo = code;
+  
+        const newReceivedMaterial = receivedMaterialRepository.create
+        (
+           {
+                ...validatedData.master,
+                customer
+           } 
+        );
         const receivedMaterialCreated = await receivedMaterialRepository.save(newReceivedMaterial);
-
-        const customer = await customerRepository.findOneBy({codigo: receivedMaterialCreated.customer.id});
 
         let saldoAtual = 0;
 
-        if(customer)
+        saldoAtual = customer.ecosaldo;
+
+        customer.ecosaldo += Number(receivedMaterialCreated.ecoSaldoTotal);
+
+        await customerRepository.save(customer);
+        
+        const savePromises = validatedData.detail.map(async detail => 
         {   
+            idMaterial = Number(detail.material);
 
-            saldoAtual = customer.ecosaldo;
-
-            customer.ecosaldo += Number(receivedMaterialCreated.ecoSaldoTotal);
-
-            await customerRepository.save(customer);
-        }
-
-        console.log('salod atual:  ' + saldoAtual);
-
-
-        const savePromises = receivedMaterialsDetail.map(detail => 
-        {
+            material = await validateIdBody(materialRepository, idMaterial, "Material");
 
             saldoAtual += detail.subtotal;
             detail.saldoAtualCustomer = saldoAtual;
 
             detail.receivedMaterial = receivedMaterialCreated;
-            return receivedMaterialDetailRepository.save(detail);
+            return receivedMaterialDetailRepository.save({...detail, material});
         });
     
         await Promise.all(savePromises);

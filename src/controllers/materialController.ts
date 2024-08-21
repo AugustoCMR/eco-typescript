@@ -102,35 +102,51 @@ export class MaterialController
         }
     }
 
-    async getMaterialById(req: Request, res: Response)
+    getMaterialById = async (req: Request, res: Response) =>
     {
         try 
         {
-            const code = parseInt(req.params.id);
-            const material = await materialRepository.findOneBy({codigo: code});
+            const code = req.params.id;
+            const material = await this.materialService.getMaterialById(code);
+            
 
-          
             res.json(material);  
         } 
         catch (error) 
         {
             console.error("Erro ao buscar material:", error);
-            res.status(500).json({ error: error});
+            
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
         }
     }
 
     receivedMaterial = async (req: Request, res: Response) =>
     {
         try 
-        {
-            await this.materialService.receivedMaterial(req.body.mestre, req.body.detalhe);
+        {   
+            await this.materialService.receivedMaterial(req.body);
 
             res.status(201).json({ message: 'Recebimento de material cadastrado com sucesso.' });
         } 
         catch (error) 
         {
             console.error("Erro ao cadastrar recebimento de materiais:", error);
-            res.status(500).json({ error: error});
+            
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
         }
     }
 

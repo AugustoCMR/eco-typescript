@@ -60,6 +60,7 @@ export async function validateIdBody(repository: Repository<any>, code: number, 
 {
     const item = await repository.findOneBy({ codigo: code });
 
+
     if (!item) 
     {
         throw new Error(`${columnName} não foi encontrado`);
@@ -67,5 +68,6 @@ export async function validateIdBody(repository: Repository<any>, code: number, 
 
     return item;
 }
+
 
 
