@@ -73,9 +73,7 @@ export class MaterialService
     {   
         const idValidated = parseInt(idSchema.parse(code));
 
-        await validateIdParam(materialRepository, "material", idValidated);
-
-        const material = await materialRepository.findOneBy({codigo: idValidated});
+        const material = await validateIdParam(materialRepository, "material", idValidated);
 
         return material;
     }

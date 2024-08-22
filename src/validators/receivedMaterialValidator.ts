@@ -36,7 +36,7 @@ const detailItemSchema = z.object({
     {
         invalid_type_error: "O campo quantidade deve conter apenas números"
     }
-  ).positive("Quantidade deve ser maior que zero"), 
+  ).positive("Quantidade deve ser maior que zero").int("O campo quantidade deve conter apenas números inteiros"), 
   ecopoint: z.number(
     {
         invalid_type_error: "O campo Eco Points deve conter apenas números"

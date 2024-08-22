@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { ProductService } from "../service/productService";
 import { productRepository } from '../repositories/productRepository';
+import { ZodError } from 'zod';
 
 export class ProductController
 {
@@ -22,7 +23,15 @@ export class ProductController
         catch(error)
         {
             console.error("Erro ao criar produto:", error);
-            res.status(400).json({ error: error });
+            
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
         }
     }
 
@@ -30,7 +39,7 @@ export class ProductController
     {
         try 
         {
-            const code = parseInt(req.params.id);
+            const code = req.params.id;
             await this.productService.updateProduct(code, req.body.product);
 
             res.status(201).json( {message: "Produto atualizado com sucesso"} )
@@ -38,7 +47,15 @@ export class ProductController
         catch (error) 
         {
             console.error("Erro ao atualizar produto:", error);
-            res.status(400).json({ error: error });
+            
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
         }
     }
 
@@ -46,7 +63,7 @@ export class ProductController
     {   
         try 
         {
-            const code = parseInt(req.params.id);
+            const code = req.params.id;
             await this.productService.deleteProduct(code);
     
             res.status(204).send();
@@ -54,7 +71,15 @@ export class ProductController
         catch (error)
         {
             console.error("Erro ao deletar produto:", error);
-            res.status(400).json({ error: error });
+            
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
         }
     }
 
@@ -73,26 +98,27 @@ export class ProductController
         }
     }
 
-    async getProductById(req: Request, res: Response)
+    getProductById = async (req: Request, res: Response) =>
     {
         try
         {
-            const code = parseInt(req.params.id);
-            const produto = await productRepository.findOneBy({codigo: code});
+            const code = req.params.id;
+            const product = await this.productService.getProductById(code);
 
-            if(produto)
-            {
-                res.json(produto);
-            }
-            else
-            {
-                res.status(404).json({ message: 'Produto não encontrado'});
-            } 
+            res.json(product);
         }
         catch (error) 
         {
             console.error("Erro ao buscar produto:", error);
-            res.status(500).json({ error: error});
+            
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
         }
     }
 
@@ -107,7 +133,15 @@ export class ProductController
         catch (error) 
         {
             console.error("Erro ao inserir produtos na operação:", error);
-            res.status(500).json({ error: error});
+            
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
         }
     } 
 
@@ -122,7 +156,15 @@ export class ProductController
         catch (error) 
         {
             console.error("Erro ao cadastrar retirada de produtos:", error);
-            res.status(500).json({ error: error});
+            
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
         }
     }
 }

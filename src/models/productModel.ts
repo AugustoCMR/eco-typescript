@@ -14,7 +14,7 @@ export class Product extends BaseEntity
     @Column({ unique: true, length: 30 })
     nome: string;
 
-    @Column()
+    @Column({default: 0, nullable: true})
     quantidade: number;
 
     @Column("float")

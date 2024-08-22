@@ -8,12 +8,12 @@ import { customerRepository } from "../repositories/customerRepository";
 const router = express.Router();
 const productController = new ProductController();
 
-router.post("/", validateName, productController.createProduct);
-router.put("/:id", validateIdParam(productRepository, "O ID do produto informado não existe"),productController.updateProduct);
-router.delete("/:id", validateIdParam(productRepository, "O ID do produto informado não existe"), productController.deleteProduct);
+router.post("/", productController.createProduct);
+router.put("/:id",productController.updateProduct);
+router.delete("/:id", productController.deleteProduct);
 router.get("/", productController.getAllProducts);
-router.get("/:id", validateIdParam(productRepository, "O ID do produto informado não existe"),productController.getProductById);
-router.post("/entrada", validateIdDetail(productRepository, 'produtos', 'produto', 'O ID do produto informado não existe'), productController.insertProductOperation);
-router.post("/saida", validateIdBody(customerRepository, 'mestre', 'usuario', "O ID do usuário informado não existe"), validateIdDetail(productRepository, 'detalhe', 'produto', 'O ID do produto informado não existe'), productController.removeProductOperation);
+router.get("/:id", productController.getProductById);
+router.post("/entrada", productController.insertProductOperation);
+router.post("/saida", productController.removeProductOperation);
 
 export default router;

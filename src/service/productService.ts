@@ -8,52 +8,78 @@ import { productRepository } from "../repositories/productRepository";
 import { removeProductOperationDetailRepository } from "../repositories/removeProductOperationDetailRepository";
 import { removeProductOperationRepository } from "../repositories/removeProductOperationRepository";
 import { CodeGenerator } from "../utils/codeGenerator";
+import { validateDelete, validateEntityName, validateIdBody, validateIdParam } from "../utils/validations";
+import { idSchema } from "../validators/idValidator";
+import { schemaInsertProduct } from "../validators/insertProductOperationValidator";
 import { productSchema } from "../validators/productValidator";
 
 export class ProductService
 {
     async createProduct(product: Product)
     {
-        let code: number = await new CodeGenerator().generateCode("product");
-
+       
         const validatedData = productSchema.parse(product);
+        await validateEntityName(productRepository, 'Produto', validatedData.nome, 'nome')
+
+
+        let code: number = await new CodeGenerator().generateCode("product");
 
         validatedData.codigo = code;
         const newProduct = productRepository.create(validatedData);
         await productRepository.save(newProduct);
     }
 
-    async updateProduct(code: number, product: Product)
-    {
+    async updateProduct(code: string, product: Product)
+    {   
+        const idValidated = parseInt(idSchema.parse(code));
+        const validatedData = productSchema.parse(product);
+        await validateEntityName(productRepository, 'Produto', validatedData.nome, 'nome', idValidated);
+        await validateIdParam(productRepository, 'Produto', idValidated);
+
         await productRepository.update
         (   
-            {codigo: code},
+            {codigo: idValidated},
             {
-                ...product
+                ...validatedData
             }
         )
     }
 
-    async deleteProduct(code: number)
-    {
-        await productRepository.delete({ codigo: code });
+    async deleteProduct(code: string)
+    {   
+        const idValidated = parseInt(idSchema.parse(code));
+        const product = await validateIdParam(productRepository, 'Produto', idValidated);
+
+        await validateDelete(insertProductOperationRepository, {produto: product}, 'Produto');
+
+        await productRepository.delete({ codigo: idValidated });
     }
 
-    async insertProductOperation (product: InsertProductOperation[])
+    async getProductById(code: string)
+    {
+        const idValidated = parseInt(idSchema.parse(code));
+        const product = await validateIdParam(productRepository, 'Produto', idValidated);
+
+        return product
+    }
+
+    async insertProductOperation (products: InsertProductOperation[])
     {   
-        const savePromises = product.map(async operation =>
+        const validatedData = schemaInsertProduct.parse({products: products});
+
+        let idProduct;
+
+        const savePromises = validatedData.products.map(async operation =>
         {   
-            const product = await productRepository.findOneBy({id: operation.produto.id});
+            idProduct = Number(operation.produto);
 
-            if (product) 
-            {
+            const product = await validateIdBody(productRepository, idProduct, "Produto");
 
-                product.quantidade += operation.quantidade;
+            product.quantidade += operation.quantidade;
 
-                await productRepository.save(product);
-            }
-
-            return insertProductOperationRepository.save(operation);
+            await productRepository.save(product);
+            
+            return insertProductOperationRepository.save({...operation, produto: product});
         })
 
         await Promise.all(savePromises);  
