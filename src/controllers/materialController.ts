@@ -131,7 +131,7 @@ export class MaterialController
     {
         try 
         {   
-            await this.materialService.receivedMaterial(req.body);
+            await this.materialService.receivedMaterial(req.body.master, req.body.detail);
 
             res.status(201).json({ message: 'Recebimento de material cadastrado com sucesso.' });
         } 

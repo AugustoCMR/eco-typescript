@@ -20,8 +20,8 @@ const masterSchema = z.object({
 
 export const receivedMaterialSchema = z.object({
   id: z.number(),
-  codigo: z.number(),
-  created_at: z.date(),
+  codigo: z.number().optional(),
+  created_at: z.date().optional(),
   ecoSaldoTotal: z.number(),
   customer: customerSchema
 })
@@ -48,10 +48,8 @@ const detailItemSchema = z.object({
     }
   ).positive("Subtotal deve ser maior que zero") ,
   saldoAtualCustomer: z.number().optional(),
-  receivedMaterial: receivedMaterialSchema
+  receivedMaterial: receivedMaterialSchema.optional()
 });
-
-
 
 
 const detailSchema = z.array(detailItemSchema);
@@ -61,5 +59,3 @@ export const schemaMasterDetail = z.object({
   detail: detailSchema
 });
 
-
-export type TypeMasterDetail = z.infer<typeof schemaMasterDetail>  

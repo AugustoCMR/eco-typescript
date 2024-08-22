@@ -10,7 +10,7 @@ import { CodeGenerator } from "../utils/codeGenerator";
 import { validateDelete, validateEntityName, validateIdBody, validateIdParam} from "../utils/validations";
 import { idSchema } from "../validators/idValidator";
 import { materialSchema } from "../validators/materialValidator";
-import { schemaMasterDetail, TypeMasterDetail } from "../validators/receivedMaterialValidator";
+import { schemaMasterDetail} from "../validators/receivedMaterialValidator";
 
 export class MaterialService
 {
@@ -80,9 +80,10 @@ export class MaterialService
         return material;
     }
 
-    async receivedMaterial(body: TypeMasterDetail)
+    async receivedMaterial(bodyMaster: ReceivedMaterial, bodyDetail: ReceivedMaterialDetail[])
     {   
-        const validatedData = schemaMasterDetail.parse(body);
+     
+        const validatedData = schemaMasterDetail.parse({master: bodyMaster, detail: bodyDetail});
         
         let idMaterial;
         let material;
@@ -94,7 +95,7 @@ export class MaterialService
         let code: number = await new CodeGenerator().generateCode("received_material");
 
         validatedData.master.codigo = code;
-  
+        
         const newReceivedMaterial = receivedMaterialRepository.create
         (
            {
@@ -102,6 +103,7 @@ export class MaterialService
                 customer
            } 
         );
+
         const receivedMaterialCreated = await receivedMaterialRepository.save(newReceivedMaterial);
 
         let saldoAtual = 0;
@@ -111,7 +113,7 @@ export class MaterialService
         customer.ecosaldo += Number(receivedMaterialCreated.ecoSaldoTotal);
 
         await customerRepository.save(customer);
-        
+
         const savePromises = validatedData.detail.map(async detail => 
         {   
             idMaterial = Number(detail.material);
