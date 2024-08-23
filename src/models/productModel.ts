@@ -23,6 +23,6 @@ export class Product extends BaseEntity
     @OneToMany(() =>  InsertProductOperation, insertProductOperation => insertProductOperation.produto)
     insertProductOperation: InsertProductOperation;
 
-    @OneToMany(() => RemoveProductOperationDetail, removeProductOperationDetail => removeProductOperationDetail.produto)
+    @OneToMany(() => RemoveProductOperationDetail, removeProductOperationDetail => removeProductOperationDetail.product)
     removeProductOperationDetail: RemoveProductOperationDetail;
 }

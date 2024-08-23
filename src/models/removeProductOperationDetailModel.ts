@@ -9,7 +9,7 @@ export class RemoveProductOperationDetail extends BaseEntity
     id: number;
 
     @ManyToOne(() => Product, product => product.removeProductOperationDetail)
-    produto: Product;
+    product: Product;
 
     @Column("float")
     ecopoints: number;

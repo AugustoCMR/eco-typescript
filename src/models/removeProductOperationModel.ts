@@ -16,7 +16,7 @@ export class RemoveProductOperation extends BaseEntity
     created_at: Date;
 
     @ManyToOne(() => Customer, customer => customer.removeProductOperation)
-    usuario: Customer;
+    customer: Customer;
 
     @OneToMany(() => RemoveProductOperationDetail, removeProductOperationDetail => removeProductOperationDetail.removeProductOperation)
     removeProductOperationDetail: RemoveProductOperationDetail;

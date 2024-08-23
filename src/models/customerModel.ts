@@ -47,6 +47,6 @@ export class Customer extends BaseEntity
     @OneToMany(() => ReceivedMaterial, receivedMaterial => receivedMaterial.customer)
     receivedMaterials: ReceivedMaterial;
 
-    @OneToMany(() => RemoveProductOperation, removeProductOperation => removeProductOperation.usuario)
+    @OneToMany(() => RemoveProductOperation, removeProductOperation => removeProductOperation.customer)
     removeProductOperation: RemoveProductOperation;
 }

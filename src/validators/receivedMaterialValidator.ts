@@ -10,7 +10,7 @@ const masterSchema = z.object({
             required_error: "O campo usuário é obrigatório",
             invalid_type_error: "O campo usuário deve conter apenas números"
         }
-    ).positive("Usuário deve ser maior que zero").int("O campo resíduo deve conter apenas números inteiros"), 
+    ).positive("Usuário deve ser maior que zero").int("O campo usuário deve conter apenas números inteiros"), 
     ecoSaldoTotal: z.number(
         {   
             invalid_type_error: "O campo saldo total deve conter apenas números"
@@ -31,7 +31,7 @@ const detailItemSchema = z.object({
     {
         invalid_type_error: "O campo material deve conter apenas números"
     }
-  ).positive("Material deve ser maior que zero"),
+  ).positive("Material deve ser maior que zero").int("O campo material deve conter apenas números inteiros"),
   quantidade: z.number(
     {
         invalid_type_error: "O campo quantidade deve conter apenas números"

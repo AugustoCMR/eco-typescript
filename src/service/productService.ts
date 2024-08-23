@@ -12,6 +12,7 @@ import { validateDelete, validateEntityName, validateIdBody, validateIdParam } f
 import { idSchema } from "../validators/idValidator";
 import { schemaInsertProduct } from "../validators/insertProductOperationValidator";
 import { productSchema } from "../validators/productValidator";
+import { schemaMasterDetail } from "../validators/removeProductOperationValidator";
 
 export class ProductService
 {
@@ -86,45 +87,52 @@ export class ProductService
     }
 
     async removeProductOperation (removeProductOperation: RemoveProductOperation, removeProductsOperationDetail: RemoveProductOperationDetail[])
-    {
+    {   
+        const validatedData = schemaMasterDetail.parse({master: removeProductOperation, detail: removeProductsOperationDetail});
+        
+
+        let idProduct;
+        let product;
+
+        const idCustomer = Number(validatedData.master.customer);
+
+        const customer = await validateIdBody(customerRepository, idCustomer, "Usuário");
+
         let code: number = await new CodeGenerator().generateCode("remove_product_operation");
 
-        removeProductOperation.codigo = code;
+        validatedData.master.codigo = code;
 
-        const newRemoveProductOperation = removeProductOperationRepository.create(removeProductOperation);
+        const newRemoveProductOperation = removeProductOperationRepository.create(
+            {
+                ...validatedData.master,
+                customer
+            }
+        );
+
         const removeProductOperationCreated = await removeProductOperationRepository.save(newRemoveProductOperation);
     
-        const customer = await customerRepository.findOneBy({codigo: removeProductOperationCreated.usuario.codigo});
-
         let saldoAtual = 0;
 
-        if(customer)
-        {   
+        saldoAtual = customer.ecosaldo;
 
-            saldoAtual = customer.ecosaldo;
+        customer.ecosaldo -= Number(removeProductOperationCreated.ecoSaldoTotal);
 
-            customer.ecosaldo -= Number(removeProductOperationCreated.ecoSaldoTotal);
-
-            await customerRepository.save(customer);
-        }
+        await customerRepository.save(customer);
         
-        const savePromises = removeProductsOperationDetail.map(async detail =>
+        const savePromises = validatedData.detail.map(async detail =>
         {
+            idProduct = Number(detail.produto);
 
-            const product = await productRepository.findOneBy({id: detail.produto.id});
+            product = await validateIdBody(productRepository, idProduct, "Produto");
 
-            if(product)
-            {
-                product.quantidade -= detail.quantidade;
-                await productRepository.save(product);
-            }
-
-            saldoAtual -= detail.subtotal;
+            product.quantidade -= detail.quantidade;
+            await productRepository.save(product);
             
+            saldoAtual -= detail.subtotal;
             detail.saldoAtualCustomer = saldoAtual;
 
             detail.removeProductOperation = removeProductOperationCreated;
-            return removeProductOperationDetailRepository.save(detail);
+            return removeProductOperationDetailRepository.save({...detail, product});
         })
 
         await Promise.all(savePromises);

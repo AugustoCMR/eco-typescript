@@ -149,7 +149,7 @@ export class ProductController
     {
         try 
         {
-            await this.productService.removeProductOperation(req.body.mestre, req.body.detalhe);
+            await this.productService.removeProductOperation(req.body.master, req.body.detail);
             
             res.status(201).json({ message: 'Retirada de produtos cadastrada com sucesso.' });
         } 

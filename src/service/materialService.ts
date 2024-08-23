@@ -118,6 +118,9 @@ export class MaterialService
 
             material = await validateIdBody(materialRepository, idMaterial, "Material");
 
+            material.quantidade += detail.quantidade;
+            await materialRepository.save(material);
+
             saldoAtual += detail.subtotal;
             detail.saldoAtualCustomer = saldoAtual;
 
