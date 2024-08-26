@@ -2,14 +2,17 @@ import { Request, Response } from 'express';
 import { ProductService } from "../service/productService";
 import { productRepository } from '../repositories/productRepository';
 import { ZodError } from 'zod';
+import { ManagerDB } from '../utils/managerDB';
 
 export class ProductController
 {
     private productService: ProductService;
+    private managerDB: ManagerDB
 
     constructor() 
     {
         this.productService = new ProductService();
+        this.managerDB = new ManagerDB();
     }
 
     createProduct = async (req: Request, res: Response) =>
@@ -123,7 +126,8 @@ export class ProductController
     }
 
     insertProductOperation = async (req: Request, res: Response) =>
-    {
+    {   
+    
         try 
         {
             await this.productService.insertProductOperation(req.body.produtos);
@@ -131,7 +135,8 @@ export class ProductController
             res.status(201).json({ message: 'Produtos recebidos com sucesso.' });
         } 
         catch (error) 
-        {
+        {   
+            
             console.error("Erro ao inserir produtos na operação:", error);
             
             if(error instanceof ZodError)
@@ -143,18 +148,22 @@ export class ProductController
                 error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
             }
         }
+      
     } 
 
     removeProductOperation = async (req: Request, res: Response) =>
-    {
+    {   
+        const conn = await this.managerDB.openConnection();
+
         try 
         {
-            await this.productService.removeProductOperation(req.body.master, req.body.detail);
-            
+            await this.productService.removeProductOperation(req.body.master, req.body.detail, conn);
+
             res.status(201).json({ message: 'Retirada de produtos cadastrada com sucesso.' });
         } 
         catch (error) 
-        {
+        {   
+            await conn.rollbackTransaction();
             console.error("Erro ao cadastrar retirada de produtos:", error);
             
             if(error instanceof ZodError)
@@ -165,6 +174,10 @@ export class ProductController
             {
                 error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
             }
+        }
+        finally
+        {
+            await conn.release();
         }
     }
 }

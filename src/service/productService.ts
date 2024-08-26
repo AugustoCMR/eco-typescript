@@ -1,3 +1,4 @@
+import { getManager, QueryRunner } from "typeorm";
 import { InsertProductOperation } from "../models/insertProductOperationModel";
 import { Product } from "../models/productModel";
 import { RemoveProductOperationDetail } from "../models/removeProductOperationDetailModel";
@@ -86,8 +87,10 @@ export class ProductService
         await Promise.all(savePromises);  
     }
 
-    async removeProductOperation (removeProductOperation: RemoveProductOperation, removeProductsOperationDetail: RemoveProductOperationDetail[])
+    async removeProductOperation (removeProductOperation: RemoveProductOperation, removeProductsOperationDetail: RemoveProductOperationDetail[], queryRunner: QueryRunner)
     {   
+       
+
         const validatedData = schemaMasterDetail.parse({master: removeProductOperation, detail: removeProductsOperationDetail});
         
 
@@ -109,33 +112,62 @@ export class ProductService
             }
         );
 
-        const removeProductOperationCreated = await removeProductOperationRepository.save(newRemoveProductOperation);
-    
+        const removeProductOperationCreated = await queryRunner.manager.save(newRemoveProductOperation);
+        
         let saldoAtual = 0;
 
         saldoAtual = customer.ecosaldo;
 
+        await this.validateCustomerBalance(customer.ecosaldo, Number(removeProductOperationCreated.ecoSaldoTotal));
+
         customer.ecosaldo -= Number(removeProductOperationCreated.ecoSaldoTotal);
 
-        await customerRepository.save(customer);
+        await queryRunner.manager.save(customer);
+
         
-        const savePromises = validatedData.detail.map(async detail =>
+
+        for (const detail of validatedData.detail)
         {
             idProduct = Number(detail.produto);
 
             product = await validateIdBody(productRepository, idProduct, "Produto");
 
+            await this.validateProductQuantity(product.quantidade, detail.quantidade, product.nome);
+
             product.quantidade -= detail.quantidade;
-            await productRepository.save(product);
+            await queryRunner.manager.save(product);
             
             saldoAtual -= detail.subtotal;
             detail.saldoAtualCustomer = saldoAtual;
 
             detail.removeProductOperation = removeProductOperationCreated;
-            return removeProductOperationDetailRepository.save({...detail, product});
-        })
+            const removeProductOperationDetailEntity = removeProductOperationDetailRepository.create({
+                ...detail,
+                product,
+            });
+        
+            await queryRunner.manager.save(removeProductOperationDetailEntity);
+        }
 
-        await Promise.all(savePromises);
+        await queryRunner.commitTransaction()
+    }
+
+    async validateCustomerBalance(customerBalance: number, totalBalance: number)
+    {   
+
+    
+        if(customerBalance < totalBalance)
+        {   
+            throw new Error("Saldo insuficiente para esta operação");
+        }
+    }
+
+    async validateProductQuantity(productQuantity: number, totalQuantity: number, product: string)
+    {
+        if(productQuantity < totalQuantity)
+        {
+            throw new Error(`Produto ${product} insuficiente em estoque`);
+        }
     }
     
 }
