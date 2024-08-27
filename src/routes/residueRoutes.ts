@@ -1,7 +1,5 @@
 import express from "express";
 import { ResidueController } from "../controllers/residueController";
-import { residueRepository } from "../repositories/residueRepository";
-import { validateIdParam } from "../middlewares/abstractMiddleware";
 
 const router = express.Router();
 const residueController = new ResidueController();

@@ -25,7 +25,14 @@ export class CustomerController
         {   
             console.error("Erro ao cadastrar cliente:", error);
 
-            error instanceof Error ?  res.status(400).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
            
         }
     };
@@ -104,6 +111,31 @@ export class CustomerController
         catch (error) 
         {   
             console.error("Erro ao buscar cliente:", error);
+
+            if(error instanceof ZodError)
+            {
+                res.status(400).json({ error: error.issues[0].message })
+            }
+            else
+            {
+                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            }
+        }
+    }
+
+    login = async (req: Request, res: Response) =>
+    {
+        try 
+        {
+            const { email, password } = req.body;
+
+            const token = await this.customerService.login(email, password);
+
+            res.json({token: token});
+        } 
+        catch (error) 
+        {
+            console.error("Erro ao fazer login:", error);
 
             if(error instanceof ZodError)
             {

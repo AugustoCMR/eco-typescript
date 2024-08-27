@@ -3,6 +3,8 @@ import { Customer } from "../models/customerModel";
 import { customerRepository } from "../repositories/customerRepository";
 import { receivedMaterialRepository } from "../repositories/receivedMaterialRepository";
 import { CodeGenerator } from "../utils/codeGenerator";
+import { checkPassword, generateHash } from "../utils/hash";
+import { generateToken } from "../utils/token";
 import { validateDelete, validateIdParam } from "../utils/validations";
 import { customerSchema } from "../validators/customerValidator";
 import { idSchema } from "../validators/idValidator";
@@ -19,6 +21,10 @@ export class CustomerService
         let code: number = await new CodeGenerator().generateCode("customer");
 
         validatedData.codigo = code;
+        const password = await generateHash(validatedData.senha);
+
+        validatedData.senha = password;
+
         const newCustomer = customerRepository.create(validatedData);
         await customerRepository.save(newCustomer);
     }
@@ -59,6 +65,27 @@ export class CustomerService
         const customer = await customerRepository.findOneBy({ codigo: idValidated });
 
         return customer;
+    }
+
+    async login(email: string, password: string)
+    {
+        const customer = await customerRepository.findOneBy({ email: email });
+
+        if(!customer)
+        {
+            throw new Error("Credenciais inválidas");
+        }
+
+        const isPasswordValid = await checkPassword(password, customer.senha);
+
+        if(!isPasswordValid)
+        {
+            throw new Error("Credenciais inválidas");
+        }
+
+        const token = generateToken({ customerId: customer.id, email: customer.email });
+
+        return token;
     }
 
     async extract(code: string)

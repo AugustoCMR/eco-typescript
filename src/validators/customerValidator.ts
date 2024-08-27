@@ -11,6 +11,12 @@ export const customerSchema = z.object
                 required_error: "O campo e-mail é obrigatório"
             }
         ).email("O e-mail deve ser válido"),
+        senha: z.string
+        (
+            {
+                required_error: "Senha é obrigatório"
+            }
+        ).min(4, "Senha deve conter no mínimo 4 caracteres"),
         ecosaldo: z.number
         (
             {

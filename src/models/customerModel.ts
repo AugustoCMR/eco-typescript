@@ -17,6 +17,9 @@ export class Customer extends BaseEntity
     @Column({ length: 40, unique: true })
     email: string;
 
+    @Column()
+    senha: string;
+
     @Column("float", {default: 0, nullable: true})
     ecosaldo: number;
 
