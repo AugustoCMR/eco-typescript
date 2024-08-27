@@ -8,11 +8,14 @@ const router = express.Router();
 const customerController = new CustomerController();
 
 router.post("/", customerController.createCustomer);
-router.put("/:id", authMiddleware, customerController.updateCustomer);
-router.delete("/:id", authMiddleware, customerController.deleteCustomer);
-router.get("/", authMiddleware, customerController.getAllCustomers);
 router.post("/login", customerController.login);
-router.get("/extrato/:id", authMiddleware, customerController.extract);
-router.get("/:id", authMiddleware, customerController.getCustomerById);
+
+router.use(authMiddleware);
+
+router.put("/:id", customerController.updateCustomer);
+router.delete("/:id", customerController.deleteCustomer);
+router.get("/", customerController.getAllCustomers);
+router.get("/extrato/:id", customerController.extract); 
+router.get("/:id", customerController.getCustomerById);
 
 export default router;
