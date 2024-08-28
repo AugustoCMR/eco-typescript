@@ -60,9 +60,9 @@ export class CustomerService
     {   
         const idValidated = parseInt(idSchema.parse(code));
 
-        await validateIdParam(customerRepository, "usuário", idValidated);
-        
-        const customer = await customerRepository.findOneBy({ codigo: idValidated });
+        const findCustomer = await validateIdParam(customerRepository, "usuário", idValidated);
+
+        const {senha, ...customer} = findCustomer;
 
         return customer;
     }
