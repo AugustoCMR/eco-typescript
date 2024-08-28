@@ -88,7 +88,9 @@ export class CustomerController
     async getAllCustomers (req: Request, res: Response) {
         try 
         {
-            const customers = await customerRepository.find();
+            const findCustomers = await customerRepository.find();
+            
+            const customers = findCustomers.map(({senha, ...customer}) => customer );
 
             res.json(customers);
         } 
