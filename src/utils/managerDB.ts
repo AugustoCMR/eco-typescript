@@ -1,4 +1,3 @@
-import { QueryRunner } from "typeorm";
 import { AppDataSource } from "../data-source"
 
 export class ManagerDB

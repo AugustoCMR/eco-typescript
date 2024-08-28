@@ -131,8 +131,6 @@ export class ProductService
 
         await queryRunner.manager.save(customer);
 
-        
-
         for (const detail of validatedData.detail)
         {
             idProduct = Number(detail.produto);

@@ -4,14 +4,17 @@ import { materialRepository } from '../repositories/materialRepository';
 import { AppDataSource } from '../data-source';
 import { Customer } from '../models/customerModel';
 import { ZodError } from 'zod';
+import { ManagerDB } from '../utils/managerDB';
 
 export class MaterialController
 {
     private materialService = new MaterialService;
+    private managerDB: ManagerDB;
 
     constructor()
     {
         this.materialService = new MaterialService();
+        this.managerDB = new ManagerDB();
     }
 
     createMaterial = async (req: Request, res: Response) =>
@@ -128,15 +131,19 @@ export class MaterialController
     }
 
     receivedMaterial = async (req: Request, res: Response) =>
-    {
+    {   
+
+        const conn = await this.managerDB.openConnection();
+
         try 
         {   
-            await this.materialService.receivedMaterial(req.body.master, req.body.detail);
+            await this.materialService.receivedMaterial(req.body.master, req.body.detail, conn);
 
             res.status(201).json({ message: 'Recebimento de material cadastrado com sucesso.' });
         } 
         catch (error) 
         {
+            await conn.rollbackTransaction();
             console.error("Erro ao cadastrar recebimento de materiais:", error);
             
             if(error instanceof ZodError)
@@ -147,6 +154,10 @@ export class MaterialController
             {
                 error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
             }
+        }
+        finally
+        {
+            await conn.release();
         }
     }
 

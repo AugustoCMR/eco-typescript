@@ -1,3 +1,4 @@
+import { QueryRunner } from "typeorm";
 import { Material } from "../models/materialModel";
 import { ReceivedMaterialDetail } from "../models/receivedMaterialDetailModel";
 import { ReceivedMaterial } from "../models/receivedMaterialModel";
@@ -78,7 +79,7 @@ export class MaterialService
         return material;
     }
 
-    async receivedMaterial(bodyMaster: ReceivedMaterial, bodyDetail: ReceivedMaterialDetail[])
+    async receivedMaterial(bodyMaster: ReceivedMaterial, bodyDetail: ReceivedMaterialDetail[], queryRunner: QueryRunner)
     {   
      
         const validatedData = schemaMasterDetail.parse({master: bodyMaster, detail: bodyDetail});
@@ -102,7 +103,7 @@ export class MaterialService
            } 
         );
 
-        const receivedMaterialCreated = await receivedMaterialRepository.save(newReceivedMaterial);
+        const receivedMaterialCreated = await queryRunner.manager.save(newReceivedMaterial);
 
         let saldoAtual = 0;
 
@@ -110,7 +111,7 @@ export class MaterialService
 
         customer.ecosaldo += Number(receivedMaterialCreated.ecoSaldoTotal);
 
-        await customerRepository.save(customer);
+        await queryRunner.manager.save(customer);
 
         const savePromises = validatedData.detail.map(async detail => 
         {   
@@ -119,15 +120,23 @@ export class MaterialService
             material = await validateIdBody(materialRepository, idMaterial, "Material");
 
             material.quantidade += detail.quantidade;
-            await materialRepository.save(material);
+            await queryRunner.manager.save(material);
 
             saldoAtual += detail.subtotal;
             detail.saldoAtualCustomer = saldoAtual;
 
             detail.receivedMaterial = receivedMaterialCreated;
-            return receivedMaterialDetailRepository.save({...detail, material});
+            const receivedMaterialDetailEntity = receivedMaterialDetailRepository.create(
+                {
+                    ...detail, 
+                    material
+                });
+
+            await queryRunner.manager.save(receivedMaterialDetailEntity);
         });
     
         await Promise.all(savePromises);
+
+        await queryRunner.commitTransaction()
     }
 }
