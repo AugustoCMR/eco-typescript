@@ -127,16 +127,17 @@ export class ProductController
 
     insertProductOperation = async (req: Request, res: Response) =>
     {   
-    
+        const conn = await this.managerDB.openConnection();
+
         try 
         {
-            await this.productService.insertProductOperation(req.body.produtos);
+            await this.productService.insertProductOperation(req.body.produtos, conn);
 
             res.status(201).json({ message: 'Produtos recebidos com sucesso.' });
         } 
         catch (error) 
         {   
-            
+            await conn.rollbackTransaction();
             console.error("Erro ao inserir produtos na operação:", error);
             
             if(error instanceof ZodError)
@@ -147,6 +148,10 @@ export class ProductController
             {
                 error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
             }
+        }
+        finally
+        {
+            await conn.release();
         }
       
     } 

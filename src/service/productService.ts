@@ -65,7 +65,7 @@ export class ProductService
         return product
     }
 
-    async insertProductOperation (products: InsertProductOperation[])
+    async insertProductOperation (products: InsertProductOperation[], queryRunner: QueryRunner)
     {   
         const validatedData = schemaInsertProduct.parse({products: products});
 
@@ -79,12 +79,19 @@ export class ProductService
 
             product.quantidade += operation.quantidade;
 
-            await productRepository.save(product);
+            await queryRunner.manager.save(product);
+
+            const insertProductOperation = insertProductOperationRepository.create({
+                ...operation,
+                produto: product,
+            });
             
-            return insertProductOperationRepository.save({...operation, produto: product});
+            return queryRunner.manager.save(insertProductOperation);
         })
 
         await Promise.all(savePromises);  
+
+        await queryRunner.commitTransaction()
     }
 
     async removeProductOperation (removeProductOperation: RemoveProductOperation, removeProductsOperationDetail: RemoveProductOperationDetail[], queryRunner: QueryRunner)
