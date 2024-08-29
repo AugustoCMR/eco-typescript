@@ -1,9 +1,6 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { customerRepository } from "../repositories/customerRepository"
 import { CustomerService } from "../service/customerService";
-import { AppDataSource } from "../data-source";
-import { Customer } from "../models/customerModel";
-import { ZodError } from "zod";
 
 export class CustomerController 
 {
@@ -13,7 +10,7 @@ export class CustomerController
         this.customerService = new CustomerService();
     }
 
-    createCustomer = async (req: Request, res: Response) => {
+    createCustomer = async (req: Request, res: Response, next: NextFunction) => {
         try 
         {
             await this.customerService.createCustomer(req.body.customer);
@@ -24,20 +21,11 @@ export class CustomerController
         catch (error) 
         {   
             console.error("Erro ao cadastrar cliente:", error);
-
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
-           
+            next(error);
         }
     };
 
-    updateCustomer = async (req: Request, res: Response) => {
+    updateCustomer = async (req: Request, res: Response, next: NextFunction) => {
         try 
         {
             const code = req.params.id;
@@ -49,19 +37,11 @@ export class CustomerController
         catch (error) 
         {
             console.error("Erro ao atualizar cliente:", error);
-        
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
         }
     };
 
-    deleteCustomer = async (req: Request, res: Response) => 
+    deleteCustomer = async (req: Request, res: Response, next: NextFunction) => 
     {
         try 
         {
@@ -73,19 +53,11 @@ export class CustomerController
         catch (error) 
         {
             console.error("Erro ao deletar cliente:", error);
-
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(400).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
         }
     };
 
-    async getAllCustomers (req: Request, res: Response) {
+    async getAllCustomers (req: Request, res: Response, next: NextFunction) {
         try 
         {
             const findCustomers = await customerRepository.find();
@@ -97,12 +69,11 @@ export class CustomerController
         catch (error) 
         {
             console.error("Erro ao buscar clientes:", error);
-
-            error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
+            next(error);
         }
     }
 
-    getCustomerById = async (req: Request, res: Response) =>
+    getCustomerById = async (req: Request, res: Response, next: NextFunction) =>
     {   try 
         {
             const code = req.params.id;
@@ -113,19 +84,11 @@ export class CustomerController
         catch (error) 
         {   
             console.error("Erro ao buscar cliente:", error);
-
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
         }
     }
 
-    login = async (req: Request, res: Response) =>
+    login = async (req: Request, res: Response, next: NextFunction) =>
     {
         try 
         {
@@ -138,19 +101,11 @@ export class CustomerController
         catch (error) 
         {
             console.error("Erro ao fazer login:", error);
-
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
         }
     }
 
-    extract = async( req: Request, res: Response) =>
+    extract = async( req: Request, res: Response, next: NextFunction) =>
     {
         try 
         {   
@@ -162,16 +117,7 @@ export class CustomerController
         catch (error) 
         {
             console.error("Erro gerar consulta:", error);
-
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
-           
+            next(error);
         }
     }
 }

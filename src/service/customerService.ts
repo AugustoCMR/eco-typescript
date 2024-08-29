@@ -1,4 +1,5 @@
 import { AppDataSource } from "../data-source";
+import { BadRequestError } from "../helpers/api-erros";
 import { Customer } from "../models/customerModel";
 import { customerRepository } from "../repositories/customerRepository";
 import { receivedMaterialRepository } from "../repositories/receivedMaterialRepository";
@@ -73,14 +74,14 @@ export class CustomerService
 
         if(!customer)
         {
-            throw new Error("Credenciais inválidas");
+            throw new BadRequestError("Credenciais inválidas");
         }
 
         const isPasswordValid = await checkPassword(password, customer.senha);
 
         if(!isPasswordValid)
         {
-            throw new Error("Credenciais inválidas");
+            throw new BadRequestError("Credenciais inválidas");
         }
 
         const token = generateToken({ customerId: customer.id, email: customer.email });
@@ -150,14 +151,14 @@ export class CustomerService
         
         if(checkCPF)
         {
-            throw new Error("O CPF informado já possui cadastro");
+            throw new BadRequestError("O CPF informado já possui cadastro");
         }
 
         const checkEmail = await customerRepository.findOneBy({ email });
 
         if(checkEmail)
         {
-            throw new Error("O E-mail informado já possuí cadastro");
+            throw new BadRequestError("O E-mail informado já possuí cadastro");
         }
     }
 }

@@ -9,6 +9,7 @@ import residueRoutes from "./routes/residueRoutes";
 import materialRoutes from "./routes/materialRoutes";
 import productRoutes from "./routes/productRoutes";
 import { authMiddleware } from "./middlewares/authMiddleware";
+import { errorMiddleware } from "./middlewares/error";
 
 const app = express();
 app.use(express.json());
@@ -20,6 +21,8 @@ app.use(authMiddleware);
 app.use("/residues", residueRoutes);
 app.use("/materials", materialRoutes);
 app.use("/products", productRoutes);
+
+app.use(errorMiddleware);
 
 app.listen(process.env.PORT, () => {
   AppDataSource.initialize()

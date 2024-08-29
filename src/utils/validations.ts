@@ -1,4 +1,5 @@
 import { Repository, Not } from "typeorm";
+import { BadRequestError, NotFoundError } from "../helpers/api-erros";
 
 export async function validateIdParam(repository: Repository<any>, entityName: string, code: number) 
 {
@@ -7,7 +8,7 @@ export async function validateIdParam(repository: Repository<any>, entityName: s
 
     if (!item) 
     {
-        throw new Error(`O ID do ${entityName} não foi encontrado`);
+        throw new NotFoundError(`O ID do ${entityName} não foi encontrado`);
     }  
 
     return item;
@@ -41,7 +42,7 @@ export async function validateEntityName(repository: Repository<any>, entityName
 
     if (checkName) 
     {
-       throw new Error(`O ${entityName} informado já possui cadastro`);
+       throw new BadRequestError(`O ${entityName} informado já possui cadastro`);
     }
 }
 
@@ -52,7 +53,7 @@ export async function validateDelete (repository: Repository<any>, objectEntity:
 
     if(checkEntity)
     {
-        throw new Error(`Não é possível deletar um ${entityName} que possui registros.`);
+        throw new BadRequestError(`Não é possível deletar um ${entityName} que possui registros.`);
     }
 }
 
@@ -63,7 +64,7 @@ export async function validateIdBody(repository: Repository<any>, code: number, 
 
     if (!item) 
     {
-        throw new Error(`${columnName} não foi encontrado`);
+        throw new NotFoundError(`${columnName} não foi encontrado`);
     }
 
     return item;
