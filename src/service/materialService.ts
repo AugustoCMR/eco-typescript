@@ -8,7 +8,13 @@ import { receivedMaterialDetailRepository } from "../repositories/receivedMateri
 import { receivedMaterialRepository } from "../repositories/receivedMaterialRepository";
 import { residueRepository } from "../repositories/residueRepository";
 import { CodeGenerator } from "../utils/codeGenerator";
-import { validateDelete, validateEntityName, validateIdBody, validateIdParam} from "../utils/validations";
+import {
+    validateDelete,
+    validateEntityName,
+    validateIdBody,
+    validateIdParam,
+    validateRepeatedItem
+} from "../utils/validations";
 import { idSchema } from "../validators/idValidator";
 import { materialSchema } from "../validators/materialValidator";
 import { schemaMasterDetail} from "../validators/receivedMaterialValidator";
@@ -21,9 +27,7 @@ export class MaterialService
         await validateEntityName(materialRepository, 'Material', validatedData.nome, 'nome');
         const residue = await validateIdBody(residueRepository, validatedData.residue, "Resíduo");
 
-        let code: number = await new CodeGenerator().generateCode("material");
-
-        validatedData.codigo = code;
+        validatedData.codigo = await new CodeGenerator().generateCode("material");
 
         const newMaterial = materialRepository.create
         (   
@@ -45,7 +49,7 @@ export class MaterialService
        
         const validatedData = materialSchema.parse(material);
 
-        await validateEntityName(materialRepository, 'Material', validatedData.nome, 'nome'), idValidated;
+        await validateEntityName(materialRepository, 'Material', validatedData.nome, 'nome', idValidated);
 
         const residue = await validateIdBody(residueRepository, validatedData.residue, "Resíduo");
         
@@ -74,9 +78,7 @@ export class MaterialService
     {   
         const idValidated = parseInt(idSchema.parse(code));
 
-        const material = await validateIdParam(materialRepository, "material", idValidated);
-
-        return material;
+        return await validateIdParam(materialRepository, "material", idValidated);
     }
 
     async receivedMaterial(bodyMaster: ReceivedMaterial, bodyDetail: ReceivedMaterialDetail[], queryRunner: QueryRunner)
@@ -86,14 +88,13 @@ export class MaterialService
         
         let idMaterial;
         let material;
+        let receivedMaterials: number[] = [];
 
         const idCustomer = Number(validatedData.master.customer);
 
         const customer = await validateIdBody(customerRepository, idCustomer, "Usuário");
 
-        let code: number = await new CodeGenerator().generateCode("received_material");
-
-        validatedData.master.codigo = code;
+        validatedData.master.codigo = await new CodeGenerator().generateCode("received_material");
         
         const newReceivedMaterial = receivedMaterialRepository.create
         (
@@ -105,17 +106,21 @@ export class MaterialService
 
         const receivedMaterialCreated = await queryRunner.manager.save(newReceivedMaterial);
 
-        let saldoAtual = 0;
 
-        saldoAtual = customer.ecosaldo;
+
+        let saldoAtual = customer.ecosaldo;
 
         customer.ecosaldo += Number(receivedMaterialCreated.ecoSaldoTotal);
 
         await queryRunner.manager.save(customer);
 
-        const savePromises = validatedData.detail.map(async detail => 
-        {   
+        for(let detail of validatedData.detail)
+        {
             idMaterial = Number(detail.material);
+
+            await validateRepeatedItem(receivedMaterials, idMaterial);
+
+            receivedMaterials.push(idMaterial);
 
             material = await validateIdBody(materialRepository, idMaterial, "Material");
 
@@ -128,14 +133,12 @@ export class MaterialService
             detail.receivedMaterial = receivedMaterialCreated;
             const receivedMaterialDetailEntity = receivedMaterialDetailRepository.create(
                 {
-                    ...detail, 
+                    ...detail,
                     material
                 });
 
             await queryRunner.manager.save(receivedMaterialDetailEntity);
-        });
-    
-        await Promise.all(savePromises);
+        }
 
         await queryRunner.commitTransaction()
     }
