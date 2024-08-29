@@ -106,8 +106,6 @@ export class MaterialService
 
         const receivedMaterialCreated = await queryRunner.manager.save(newReceivedMaterial);
 
-
-
         let saldoAtual = customer.ecosaldo;
 
         customer.ecosaldo += Number(receivedMaterialCreated.ecoSaldoTotal);
