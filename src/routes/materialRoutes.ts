@@ -1,10 +1,5 @@
 import express from "express";
 import { MaterialController } from "../controllers/materialController";
-import { validateName } from "../middlewares/materialMiddleware";
-import { materialRepository } from "../repositories/materialRepository";
-import { validateIdBody, validateIdParam, validateIdDetail } from "../middlewares/abstractMiddleware";
-import { residueRepository } from "../repositories/residueRepository";
-import { customerRepository } from "../repositories/customerRepository";
 
 const router = express.Router();
 const materialController = new MaterialController();

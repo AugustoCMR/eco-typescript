@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { MaterialService } from '../service/materialService';
 import { materialRepository } from '../repositories/materialRepository';
 import { AppDataSource } from '../data-source';
@@ -17,7 +17,7 @@ export class MaterialController
         this.managerDB = new ManagerDB();
     }
 
-    createMaterial = async (req: Request, res: Response) =>
+    createMaterial = async (req: Request, res: Response, next: NextFunction) =>
     {
         try 
         {
@@ -29,19 +29,12 @@ export class MaterialController
         {
             console.error("Erro ao criar material:", error);
             
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
 
         }
     }
 
-    updateMaterial = async (req: Request, res: Response) =>
+    updateMaterial = async (req: Request, res: Response, next: NextFunction) =>
     {
         try 
         {
@@ -54,18 +47,11 @@ export class MaterialController
         {
             console.error("Erro ao atualizar material:", error);
             
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
     }
     }
 
-    deleteMaterial = async (req: Request, res: Response) =>
+    deleteMaterial = async (req: Request, res: Response, next: NextFunction) =>
     {
         try 
         {
@@ -78,19 +64,12 @@ export class MaterialController
         {
             console.error("Erro ao deletar material:", error);
            
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
         }
 
     }
 
-    async getAllMaterials (req: Request, res: Response)
+    async getAllMaterials (req: Request, res: Response, next: NextFunction)
     {
         try
         {
@@ -101,11 +80,11 @@ export class MaterialController
         catch (error)
         {
             console.error("Erro ao buscar materiais:", error);
-            res.status(500).json({ error: error });
+            next(error);
         }
     }
 
-    getMaterialById = async (req: Request, res: Response) =>
+    getMaterialById = async (req: Request, res: Response, next: NextFunction) =>
     {
         try 
         {
@@ -119,18 +98,11 @@ export class MaterialController
         {
             console.error("Erro ao buscar material:", error);
             
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
         }
     }
 
-    receivedMaterial = async (req: Request, res: Response) =>
+    receivedMaterial = async (req: Request, res: Response, next: NextFunction) =>
     {   
 
         const conn = await this.managerDB.openConnection();
@@ -146,14 +118,7 @@ export class MaterialController
             await conn.rollbackTransaction();
             console.error("Erro ao cadastrar recebimento de materiais:", error);
             
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
         }
         finally
         {
@@ -161,7 +126,7 @@ export class MaterialController
         }
     }
 
-    async detailedMaterialFetch (req: Request, res: Response)
+    async detailedMaterialFetch (req: Request, res: Response, next: NextFunction)
     {
         try 
         {
@@ -177,7 +142,7 @@ export class MaterialController
         catch (error) 
         {
             console.error("Erro gerar consulta:", error);
-            res.status(500).json({ error: error});
+            next(error);
         }
     }
 }

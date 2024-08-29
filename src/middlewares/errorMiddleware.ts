@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import { ApiError } from '../helpers/api-erros'
 import { ZodError } from 'zod'
 
-export const errorMiddleware = (
+export const error = (
 	error: Error & Partial<ApiError>,
 	req: Request,
 	res: Response,
@@ -11,7 +11,7 @@ export const errorMiddleware = (
 
     if(error instanceof ZodError)
     {
-        res.status(400).json({ error: error.issues[0].message });
+        return res.status(400).json({ error: error.issues[0].message });
     }
 
 	const statusCode = error.statusCode ?? 500
