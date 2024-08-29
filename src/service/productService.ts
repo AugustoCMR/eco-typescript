@@ -1,4 +1,4 @@
-import { getManager, QueryRunner } from "typeorm";
+import { QueryRunner } from "typeorm";
 import { InsertProductOperation } from "../models/insertProductOperationModel";
 import { Product } from "../models/productModel";
 import { RemoveProductOperationDetail } from "../models/removeProductOperationDetailModel";
@@ -9,7 +9,13 @@ import { productRepository } from "../repositories/productRepository";
 import { removeProductOperationDetailRepository } from "../repositories/removeProductOperationDetailRepository";
 import { removeProductOperationRepository } from "../repositories/removeProductOperationRepository";
 import { CodeGenerator } from "../utils/codeGenerator";
-import { validateDelete, validateEntityName, validateIdBody, validateIdParam } from "../utils/validations";
+import {
+    validateDelete,
+    validateEntityName,
+    validateIdBody,
+    validateIdParam,
+    validateRepeatedItem
+} from "../utils/validations";
 import { idSchema } from "../validators/idValidator";
 import { schemaInsertProduct } from "../validators/insertProductOperationValidator";
 import { productSchema } from "../validators/productValidator";
@@ -24,10 +30,7 @@ export class ProductService
         const validatedData = productSchema.parse(product);
         await validateEntityName(productRepository, 'Produto', validatedData.nome, 'nome')
 
-
-        let code: number = await new CodeGenerator().generateCode("product");
-
-        validatedData.codigo = code;
+        validatedData.codigo = await new CodeGenerator().generateCode("product");
         const newProduct = productRepository.create(validatedData);
         await productRepository.save(newProduct);
     }
@@ -61,9 +64,8 @@ export class ProductService
     async getProductById(code: string)
     {
         const idValidated = parseInt(idSchema.parse(code));
-        const product = await validateIdParam(productRepository, 'Produto', idValidated);
 
-        return product
+        return await validateIdParam(productRepository, 'Produto', idValidated);
     }
 
     async insertProductOperation (products: InsertProductOperation[], queryRunner: QueryRunner)
@@ -71,10 +73,15 @@ export class ProductService
         const validatedData = schemaInsertProduct.parse({products: products});
 
         let idProduct;
+        let insertedProducts: number[] = [];
 
-        const savePromises = validatedData.products.map(async operation =>
-        {   
+        for(let operation of validatedData.products)
+        {
             idProduct = Number(operation.produto);
+
+            await validateRepeatedItem(insertedProducts, idProduct);
+
+            insertedProducts.push(idProduct);
 
             const product = await validateIdBody(productRepository, idProduct, "Produto");
 
@@ -86,11 +93,9 @@ export class ProductService
                 ...operation,
                 produto: product,
             });
-            
-            return queryRunner.manager.save(insertProductOperation);
-        })
 
-        await Promise.all(savePromises);  
+            await queryRunner.manager.save(insertProductOperation);
+        }
 
         await queryRunner.commitTransaction()
     }
@@ -104,14 +109,13 @@ export class ProductService
 
         let idProduct;
         let product;
+        let removedProducts: number[] = [];
 
         const idCustomer = Number(validatedData.master.customer);
 
         const customer = await validateIdBody(customerRepository, idCustomer, "Usuário");
 
-        let code: number = await new CodeGenerator().generateCode("remove_product_operation");
-
-        validatedData.master.codigo = code;
+        validatedData.master.codigo = await new CodeGenerator().generateCode("remove_product_operation");
 
         const newRemoveProductOperation = removeProductOperationRepository.create(
             {
@@ -121,10 +125,8 @@ export class ProductService
         );
 
         const removeProductOperationCreated = await queryRunner.manager.save(newRemoveProductOperation);
-        
-        let saldoAtual = 0;
 
-        saldoAtual = customer.ecosaldo;
+        let saldoAtual = customer.ecosaldo;
 
         await this.validateCustomerBalance(customer.ecosaldo, Number(removeProductOperationCreated.ecoSaldoTotal));
 
@@ -135,6 +137,10 @@ export class ProductService
         for (const detail of validatedData.detail)
         {
             idProduct = Number(detail.produto);
+
+            await validateRepeatedItem(removedProducts, idProduct);
+
+            removedProducts.push(idProduct);
 
             product = await validateIdBody(productRepository, idProduct, "Produto");
 
