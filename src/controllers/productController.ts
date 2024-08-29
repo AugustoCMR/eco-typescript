@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { ProductService } from "../service/productService";
 import { productRepository } from '../repositories/productRepository';
 import { ZodError } from 'zod';
@@ -15,7 +15,7 @@ export class ProductController
         this.managerDB = new ManagerDB();
     }
 
-    createProduct = async (req: Request, res: Response) =>
+    createProduct = async (req: Request, res: Response, next: NextFunction) =>
     {
         try
         {
@@ -26,19 +26,11 @@ export class ProductController
         catch(error)
         {
             console.error("Erro ao criar produto:", error);
-            
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
         }
     }
 
-    updateProduct = async (req: Request, res: Response) =>
+    updateProduct = async (req: Request, res: Response, next: NextFunction) =>
     {
         try 
         {
@@ -50,19 +42,11 @@ export class ProductController
         catch (error) 
         {
             console.error("Erro ao atualizar produto:", error);
-            
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
         }
     }
 
-    deleteProduct = async (req: Request, res: Response) =>
+    deleteProduct = async (req: Request, res: Response, next: NextFunction) =>
     {   
         try 
         {
@@ -74,19 +58,11 @@ export class ProductController
         catch (error)
         {
             console.error("Erro ao deletar produto:", error);
-            
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
         }
     }
 
-    async getAllProducts (req: Request, res: Response)
+    async getAllProducts (req: Request, res: Response, next: NextFunction)
     {
         try 
         {
@@ -97,11 +73,11 @@ export class ProductController
         catch (error) 
         {
             console.error("Erro ao buscar produtos:", error);
-            res.status(500).json({ error: error });
+            next(error);
         }
     }
 
-    getProductById = async (req: Request, res: Response) =>
+    getProductById = async (req: Request, res: Response, next: NextFunction) =>
     {
         try
         {
@@ -113,19 +89,11 @@ export class ProductController
         catch (error) 
         {
             console.error("Erro ao buscar produto:", error);
-            
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
         }
     }
 
-    insertProductOperation = async (req: Request, res: Response) =>
+    insertProductOperation = async (req: Request, res: Response, next: NextFunction) =>
     {   
         const conn = await this.managerDB.openConnection();
 
@@ -139,15 +107,7 @@ export class ProductController
         {   
             await conn.rollbackTransaction();
             console.error("Erro ao inserir produtos na operação:", error);
-            
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
         }
         finally
         {
@@ -156,7 +116,7 @@ export class ProductController
       
     } 
 
-    removeProductOperation = async (req: Request, res: Response) =>
+    removeProductOperation = async (req: Request, res: Response, next: NextFunction) =>
     {   
         const conn = await this.managerDB.openConnection();
 
@@ -170,15 +130,7 @@ export class ProductController
         {   
             await conn.rollbackTransaction();
             console.error("Erro ao cadastrar retirada de produtos:", error);
-            
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
         }
         finally
         {

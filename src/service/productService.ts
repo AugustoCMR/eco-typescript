@@ -14,6 +14,7 @@ import { idSchema } from "../validators/idValidator";
 import { schemaInsertProduct } from "../validators/insertProductOperationValidator";
 import { productSchema } from "../validators/productValidator";
 import { schemaMasterDetail } from "../validators/removeProductOperationValidator";
+import { BadRequestError } from "../helpers/api-erros";
 
 export class ProductService
 {
@@ -163,7 +164,7 @@ export class ProductService
     
         if(customerBalance < totalBalance)
         {   
-            throw new Error("Saldo insuficiente para esta operação");
+            throw new BadRequestError("Saldo insuficiente para esta operação");
         }
     }
 
@@ -171,7 +172,7 @@ export class ProductService
     {
         if(productQuantity < totalQuantity)
         {
-            throw new Error(`Produto ${product} insuficiente em estoque`);
+            throw new BadRequestError(`Produto ${product} insuficiente em estoque`);
         }
     }
     
