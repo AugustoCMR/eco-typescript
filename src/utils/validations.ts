@@ -70,5 +70,13 @@ export async function validateIdBody(repository: Repository<any>, code: number, 
     return item;
 }
 
+export async function validateRepeatedItem(arrayItems: number[], item: number)
+{
+    if(arrayItems.includes(item))
+    {
+        throw new BadRequestError("Não é possível cadastrar itens duplicados");
+    }
+}
+
 
 

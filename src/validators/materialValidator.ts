@@ -4,8 +4,18 @@ export const materialSchema = z.object
 (
     {
         codigo: z.number().optional(),
-        nome: z.string().min(1, "O campo nome é obrigatório"),
-        unidade_medida: z.string().min(1, "O campo unidade de medida é obrigatório"),
+        nome: z.string
+        (
+            {
+                    required_error: "Nome é obrigatório"
+            }
+        ).min(1, "O campo nome é obrigatório"),
+        unidade_medida: z.string
+        (
+            {
+                    required_error: "Nome é obrigatório"
+            }
+        ).min(1, "O campo unidade de medida é obrigatório"),
         ecopoint: z.number
         (
             {
