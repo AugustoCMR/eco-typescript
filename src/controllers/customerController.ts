@@ -53,8 +53,9 @@ export class CustomerController
     {
         try 
         {
-            const code = req.params.id;
-            await this.customerService.deleteCustomer(code);
+            const idValidated = parseInt(idSchema.parse(req.params.id));
+
+            await this.customerService.deleteCustomer(idValidated);
 
             res.status(204).send();
         } 

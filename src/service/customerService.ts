@@ -36,15 +36,13 @@ export class CustomerService
         );
     }
 
-    async deleteCustomer(code: string) 
-    {   
-        const idValidated = parseInt(idSchema.parse(code));
-
-        const customer = await validateIdParam(customerRepository, "usuário", idValidated);
+    async deleteCustomer(code: number)
+    {
+        const customer = await validateIdParam(customerRepository, "usuário", code);
 
         await validateDelete(receivedMaterialRepository, {customer: customer}, "usuário");
 
-        await customerRepository.delete({ codigo: idValidated });
+        await customerRepository.delete({ codigo: code });
     }
 
     async getCustomerById(code: string)
