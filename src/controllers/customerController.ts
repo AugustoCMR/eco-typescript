@@ -104,6 +104,8 @@ export class CustomerController
         {
             const { email, password } = req.body;
 
+
+
             const token = await this.customerService.login(email, password);
 
             res.json({token: token});
@@ -118,9 +120,10 @@ export class CustomerController
     extract = async( req: Request, res: Response, next: NextFunction) =>
     {
         try 
-        {   
-            const customerId = req.params.id;
-            const extract = await this.customerService.extract(customerId);
+        {
+            const validatedId = parseInt(idSchema.parse(req.params.id));
+
+            const extract = await this.customerService.extract(validatedId);
            
             res.json(extract);
         } 

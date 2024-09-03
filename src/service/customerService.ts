@@ -7,7 +7,6 @@ import { checkPassword, generateHash } from "../utils/hash";
 import { generateToken } from "../utils/token";
 import { validateDelete, validateIdParam } from "../utils/validations";
 import { customerSchema } from "../validators/customerValidator";
-import { idSchema } from "../validators/idValidator";
 
 export class CustomerService 
 {
@@ -73,11 +72,9 @@ export class CustomerService
         return generateToken({ customerId: customer.id, email: customer.email });
     }
 
-    async extract(code: string)
+    async extract(code: number)
     {
-        const validatedData = idSchema.parse(code);
-        
-        await validateIdParam(customerRepository, "usuário", parseInt(validatedData));
+        await validateIdParam(customerRepository, "usuário", code);
 
         return await AppDataSource.query(`
             SELECT 
