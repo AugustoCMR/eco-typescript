@@ -32,3 +32,5 @@ export const materialSchema = z.object
         ).int("O campo resíduo deve conter apenas números inteiros")
     }
 )
+
+export type materialSchema = z.infer<typeof materialSchema>;
