@@ -3,10 +3,10 @@ import { MaterialService } from '../service/materialService';
 import { materialRepository } from '../repositories/materialRepository';
 import { AppDataSource } from '../data-source';
 import { Customer } from '../models/customerModel';
-import { ZodError } from 'zod';
 import { ManagerDB } from '../utils/managerDB';
 import {materialSchema} from "../validators/materialValidator";
 import {idSchema} from "../validators/idValidator";
+import {schemaMasterDetail} from "../validators/receivedMaterialValidator";
 
 export class MaterialController
 {
@@ -117,8 +117,10 @@ export class MaterialController
         const conn = await this.managerDB.openConnection();
 
         try 
-        {   
-            await this.materialService.receivedMaterial(req.body.master, req.body.detail, conn);
+        {
+            const validatedData = schemaMasterDetail.parse(req.body.master, req.body.detail);
+
+            await this.materialService.receivedMaterial(validatedData, conn);
 
             res.status(201).json({ message: 'Recebimento de material cadastrado com sucesso.' });
         } 

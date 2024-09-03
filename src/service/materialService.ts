@@ -15,9 +15,8 @@ import {
     validateIdParam,
     validateRepeatedItem
 } from "../utils/validations";
-import { idSchema } from "../validators/idValidator";
 import { materialSchema } from "../validators/materialValidator";
-import { schemaMasterDetail} from "../validators/receivedMaterialValidator";
+import {schemaMasterDetail, schemaReceivedMaterial} from "../validators/receivedMaterialValidator";
 
 export class MaterialService
 {
@@ -67,30 +66,29 @@ export class MaterialService
     }
 
     async getMaterialById (code: number)
-    {   
-
+    {
         return await validateIdParam(materialRepository, "material", code);
     }
 
-    async receivedMaterial(bodyMaster: ReceivedMaterial, bodyDetail: ReceivedMaterialDetail[], queryRunner: QueryRunner)
+    async receivedMaterial(body: schemaReceivedMaterial, queryRunner: QueryRunner)
     {   
      
-        const validatedData = schemaMasterDetail.parse({master: bodyMaster, detail: bodyDetail});
+        const objectMasterDetail = schemaMasterDetail.parse({master: body.master, detail: body.detail});
         
         let idMaterial;
         let material;
         let receivedMaterials: number[] = [];
 
-        const idCustomer = Number(validatedData.master.customer);
+        const idCustomer = Number(objectMasterDetail.master.customer);
 
         const customer = await validateIdBody(customerRepository, idCustomer, "Usuário");
 
-        validatedData.master.codigo = await new CodeGenerator().generateCode("received_material");
+        objectMasterDetail.master.codigo = await new CodeGenerator().generateCode("received_material");
         
         const newReceivedMaterial = receivedMaterialRepository.create
         (
            {
-                ...validatedData.master,
+                ...objectMasterDetail.master,
                 customer
            } 
         );
@@ -103,7 +101,7 @@ export class MaterialService
 
         await queryRunner.manager.save(customer);
 
-        for(let detail of validatedData.detail)
+        for(let detail of objectMasterDetail.detail)
         {
             idMaterial = Number(detail.material);
 
