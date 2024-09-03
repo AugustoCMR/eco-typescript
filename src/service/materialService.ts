@@ -39,24 +39,19 @@ export class MaterialService
         await materialRepository.save(newMaterial); 
     }
 
-    async updateMaterial(code: string, material: Material)
-    {   
-        
-        const idValidated = parseInt(idSchema.parse(code));
-        
-        await validateIdParam(materialRepository, "material", idValidated);
-       
-        const validatedData = materialSchema.parse(material);
+    async updateMaterial(code: number, material: materialSchema)
+    {
+        await validateIdParam(materialRepository, "material", code);
 
-        await validateEntityName(materialRepository, 'Material', validatedData.nome, 'nome', idValidated);
+        await validateEntityName(materialRepository, 'Material', material.nome, 'nome', code);
 
-        const residue = await validateIdBody(residueRepository, validatedData.residue, "Resíduo");
+        const residue = await validateIdBody(residueRepository, material.residue, "Resíduo");
         
         await materialRepository.update
         (
-            {codigo: idValidated},
+            {codigo: code},
             {
-                ...validatedData,
+                ...material,
                 residue
             }
         )

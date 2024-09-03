@@ -6,6 +6,7 @@ import { Customer } from '../models/customerModel';
 import { ZodError } from 'zod';
 import { ManagerDB } from '../utils/managerDB';
 import {materialSchema} from "../validators/materialValidator";
+import {idSchema} from "../validators/idValidator";
 
 export class MaterialController
 {
@@ -41,8 +42,10 @@ export class MaterialController
     {
         try 
         {
-            const code = req.params.id;
-            await this.materialService.updateMaterial(code, req.body.material);
+            const validatedId = parseInt(idSchema.parse(req.params.id));
+            const validatedData = materialSchema.parse(req.body.material);
+
+            await this.materialService.updateMaterial(validatedId, validatedData);
             
             res.status(201).json( {message: "Material atualizado com sucesso"} )
         } 
