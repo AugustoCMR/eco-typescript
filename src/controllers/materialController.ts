@@ -61,6 +61,7 @@ export class MaterialController
     {
         try 
         {
+
             const validatedId = parseInt(idSchema.parse(req.params.id));
 
             await this.materialService.deleteMaterial(validatedId);
@@ -95,8 +96,9 @@ export class MaterialController
     {
         try 
         {
-            const code = req.params.id;
-            const material = await this.materialService.getMaterialById(code);
+            const validatedId = parseInt(idSchema.parse(req.params.id));
+
+            const material = await this.materialService.getMaterialById(validatedId);
             
 
             res.json(material);  

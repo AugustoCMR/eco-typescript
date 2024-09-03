@@ -66,11 +66,10 @@ export class MaterialService
         await materialRepository.delete({ codigo: code });
     }
 
-    async getMaterialById (code: string)
+    async getMaterialById (code: number)
     {   
-        const idValidated = parseInt(idSchema.parse(code));
 
-        return await validateIdParam(materialRepository, "material", idValidated);
+        return await validateIdParam(materialRepository, "material", code);
     }
 
     async receivedMaterial(bodyMaster: ReceivedMaterial, bodyDetail: ReceivedMaterialDetail[], queryRunner: QueryRunner)
