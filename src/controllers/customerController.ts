@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { customerRepository } from "../repositories/customerRepository"
 import { CustomerService } from "../service/customerService";
 import {customerSchema} from "../validators/customerValidator";
+import {idSchema} from "../validators/idValidator";
 
 export class CustomerController 
 {
@@ -32,8 +33,11 @@ export class CustomerController
     updateCustomer = async (req: Request, res: Response, next: NextFunction) => {
         try 
         {
-            const code = req.params.id;
-            await this.customerService.updateCustomer(code, req.body.customer);
+            const idValidated = parseInt(idSchema.parse(req.params.id));
+
+            const validatedData = customerSchema.parse(req.body.customer);
+
+            await this.customerService.updateCustomer(idValidated, validatedData);
 
             res.status(200).json({ message: "Usuário atualizado com sucesso!" });
 

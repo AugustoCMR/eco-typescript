@@ -1,6 +1,5 @@
 import { AppDataSource } from "../data-source";
 import { BadRequestError } from "../helpers/api-erros";
-import { Customer } from "../models/customerModel";
 import { customerRepository } from "../repositories/customerRepository";
 import { receivedMaterialRepository } from "../repositories/receivedMaterialRepository";
 import { CodeGenerator } from "../utils/codeGenerator";
@@ -24,18 +23,15 @@ export class CustomerService
         await customerRepository.save(newCustomer);
     }
 
-    async updateCustomer(code: string, customer: Customer) 
-    {   
-        const idValidated = parseInt(idSchema.parse(code));
-        await validateIdParam(customerRepository, "usuário", idValidated);
+    async updateCustomer(code: number, customer: customerSchema)
+    {
+        await validateIdParam(customerRepository, "usuário", code);
 
-        const validatedData = customerSchema.parse(customer);
-        
         await customerRepository.update
         (   
-            {codigo: idValidated},
+            {codigo: code},
             {
-                ...validatedData
+                ...customer
             }   
         );
     }
@@ -78,9 +74,7 @@ export class CustomerService
             throw new BadRequestError("Credenciais inválidas");
         }
 
-        const token = generateToken({ customerId: customer.id, email: customer.email });
-
-        return token;
+        return generateToken({ customerId: customer.id, email: customer.email });
     }
 
     async extract(code: string)
@@ -89,7 +83,7 @@ export class CustomerService
         
         await validateIdParam(customerRepository, "usuário", parseInt(validatedData));
 
-        const extract = await AppDataSource.query(`
+        return await AppDataSource.query(`
             SELECT 
                 ct.nome, 
                 ct.ecosaldo,
@@ -135,8 +129,6 @@ export class CustomerService
             ORDER BY 
                 created_at DESC;
         `, [code]);
-
-        return extract;
     }
 
     async validateCPFAndEmail(cpf: string, email: string)
