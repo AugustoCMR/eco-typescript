@@ -3,7 +3,7 @@ import { ReceivedMaterial } from "./receivedMaterialModel";
 import { RemoveProductOperation } from "./removeProductOperationModel";
 
 @Entity()
-export class Customer extends BaseEntity
+export class Customer
 {
     @PrimaryGeneratedColumn()
     id: number;
@@ -48,8 +48,8 @@ export class Customer extends BaseEntity
     numero: string;
 
     @OneToMany(() => ReceivedMaterial, receivedMaterial => receivedMaterial.customer)
-    receivedMaterials: ReceivedMaterial;
+    receivedMaterials?: ReceivedMaterial;
 
     @OneToMany(() => RemoveProductOperation, removeProductOperation => removeProductOperation.customer)
-    removeProductOperation: RemoveProductOperation;
+    removeProductOperation?: RemoveProductOperation;
 }
