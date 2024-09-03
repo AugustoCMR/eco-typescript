@@ -12,21 +12,15 @@ import { idSchema } from "../validators/idValidator";
 
 export class CustomerService 
 {
-
-    async createCustomer(customer: Customer) 
+    async createCustomer(customer: customerSchema)
     {
-        const validatedData = customerSchema.parse(customer);
-
         await this.validateCPFAndEmail(customer.cpf, customer.email);
 
-        let code: number = await new CodeGenerator().generateCode("customer");
+        customer.codigo = await new CodeGenerator().generateCode("customer");
 
-        validatedData.codigo = code;
-        const password = await generateHash(validatedData.senha);
+        customer.senha = await generateHash(customer.senha);
 
-        validatedData.senha = password;
-
-        const newCustomer = customerRepository.create(validatedData);
+        const newCustomer = customerRepository.create(customer);
         await customerRepository.save(newCustomer);
     }
 

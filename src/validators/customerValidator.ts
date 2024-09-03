@@ -83,3 +83,5 @@ export const customerSchema = z.object
         ).min(1, "O campo número é obrigatório")
     }   
 );
+
+export type customerSchema = z.infer<typeof customerSchema>;

@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { customerRepository } from "../repositories/customerRepository"
 import { CustomerService } from "../service/customerService";
+import {customerSchema} from "../validators/customerValidator";
 
 export class CustomerController 
 {
@@ -10,10 +11,13 @@ export class CustomerController
         this.customerService = new CustomerService();
     }
 
-    createCustomer = async (req: Request, res: Response, next: NextFunction) => {
+    createCustomer = async (req: Request, res: Response, next: NextFunction) =>
+    {
         try 
         {
-            await this.customerService.createCustomer(req.body.customer);
+            const validatedData = customerSchema.parse(req.body.customer);
+
+            await this.customerService.createCustomer(validatedData);
 
             res.status(201).json({ message: "Usuário cadastrado com sucesso!" });
 
@@ -23,7 +27,7 @@ export class CustomerController
             console.error("Erro ao cadastrar cliente:", error);
             next(error);
         }
-    };
+    }
 
     updateCustomer = async (req: Request, res: Response, next: NextFunction) => {
         try 
