@@ -85,8 +85,9 @@ export class CustomerController
     getCustomerById = async (req: Request, res: Response, next: NextFunction) =>
     {   try 
         {
-            const code = req.params.id;
-            const customer = await this.customerService.getCustomerById(code);
+            const idValidated = parseInt(idSchema.parse(req.params.id));
+
+            const customer = await this.customerService.getCustomerById(idValidated);
             
             res.json(customer);
         } 

@@ -45,11 +45,9 @@ export class CustomerService
         await customerRepository.delete({ codigo: code });
     }
 
-    async getCustomerById(code: string)
-    {   
-        const idValidated = parseInt(idSchema.parse(code));
-
-        const findCustomer = await validateIdParam(customerRepository, "usuário", idValidated);
+    async getCustomerById(code: number)
+    {
+        const findCustomer = await validateIdParam(customerRepository, "usuário", code);
 
         const {senha, ...customer} = findCustomer;
 
