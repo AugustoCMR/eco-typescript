@@ -5,6 +5,7 @@ import { AppDataSource } from '../data-source';
 import { Customer } from '../models/customerModel';
 import { ZodError } from 'zod';
 import { ManagerDB } from '../utils/managerDB';
+import {materialSchema} from "../validators/materialValidator";
 
 export class MaterialController
 {
@@ -21,7 +22,9 @@ export class MaterialController
     {
         try 
         {
-            await this.materialService.createMaterial(req.body.material);
+            const validatedData = materialSchema.parse(req.body.material);
+
+            await this.materialService.createMaterial(validatedData);
 
             res.status(201).json({ message: 'Material cadastrado com sucesso' });
         } 

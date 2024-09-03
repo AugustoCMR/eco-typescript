@@ -21,18 +21,17 @@ import { schemaMasterDetail} from "../validators/receivedMaterialValidator";
 
 export class MaterialService
 {
-    async createMaterial(material: Material)
+    async createMaterial(material: materialSchema)
     {
-        const validatedData = materialSchema.parse(material);
-        await validateEntityName(materialRepository, 'Material', validatedData.nome, 'nome');
-        const residue = await validateIdBody(residueRepository, validatedData.residue, "Resíduo");
+        await validateEntityName(materialRepository, 'Material', material.nome, 'nome');
+        const residue = await validateIdBody(residueRepository, material.residue, "Resíduo");
 
-        validatedData.codigo = await new CodeGenerator().generateCode("material");
+        material.codigo = await new CodeGenerator().generateCode("material");
 
         const newMaterial = materialRepository.create
         (   
             {
-                ...validatedData,
+                ...material,
                 residue: residue   
             }  
         );   
