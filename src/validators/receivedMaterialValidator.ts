@@ -59,3 +59,7 @@ export const schemaMasterDetail = z.object({
   detail: detailSchema
 });
 
+export type schemaReceivedMaterial = z.infer<typeof schemaMasterDetail>;
+
+
+
