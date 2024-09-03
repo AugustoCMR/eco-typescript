@@ -141,12 +141,7 @@ export class MaterialController
     {
         try 
         {
-           
-            const materials = await AppDataSource.getRepository(Customer)
-            .createQueryBuilder('customer')
-            .innerJoinAndSelect('customer.receivedMaterials', 'receivedMaterials')
-            .innerJoinAndSelect('receivedMaterials.receivedMaterialsDetail', 'receivedMaterialsDetail')
-            .getMany();
+            const materials = await this.materialService.detailedMaterialFetch();
             
             res.json(materials);
         } 

@@ -1,7 +1,4 @@
 import { QueryRunner } from "typeorm";
-import { Material } from "../models/materialModel";
-import { ReceivedMaterialDetail } from "../models/receivedMaterialDetailModel";
-import { ReceivedMaterial } from "../models/receivedMaterialModel";
 import { customerRepository } from "../repositories/customerRepository";
 import { materialRepository } from "../repositories/materialRepository";
 import { receivedMaterialDetailRepository } from "../repositories/receivedMaterialDetailRepository";
@@ -17,6 +14,8 @@ import {
 } from "../utils/validations";
 import { materialSchema } from "../validators/materialValidator";
 import {schemaMasterDetail, schemaReceivedMaterial} from "../validators/receivedMaterialValidator";
+import {AppDataSource} from "../data-source";
+import {Customer} from "../models/customerModel";
 
 export class MaterialService
 {
@@ -70,10 +69,9 @@ export class MaterialService
         return await validateIdParam(materialRepository, "material", code);
     }
 
-    async receivedMaterial(body: schemaReceivedMaterial, queryRunner: QueryRunner)
+    async receivedMaterial(object: schemaReceivedMaterial, queryRunner: QueryRunner)
     {   
-     
-        const objectMasterDetail = schemaMasterDetail.parse({master: body.master, detail: body.detail});
+        const objectMasterDetail = schemaMasterDetail.parse({master: object.master, detail: object.detail});
         
         let idMaterial;
         let material;
@@ -128,5 +126,14 @@ export class MaterialService
         }
 
         await queryRunner.commitTransaction()
+    }
+
+    async detailedMaterialFetch()
+    {
+        return await AppDataSource.getRepository(Customer)
+            .createQueryBuilder('customer')
+            .innerJoinAndSelect('customer.receivedMaterials', 'receivedMaterials')
+            .innerJoinAndSelect('receivedMaterials.receivedMaterialsDetail', 'receivedMaterialsDetail')
+            .getMany();
     }
 }
