@@ -3,6 +3,7 @@ import { ProductService } from "../service/productService";
 import { productRepository } from '../repositories/productRepository';
 import { ZodError } from 'zod';
 import { ManagerDB } from '../utils/managerDB';
+import {productSchema} from "../validators/productValidator";
 
 export class ProductController
 {
@@ -19,7 +20,9 @@ export class ProductController
     {
         try
         {
-            await this.productService.createProduct(req.body.product);
+            const validatedData = productSchema.parse(req.body.product);
+
+            await this.productService.createProduct(validatedData);
 
             res.status(201).json({ message: 'Produto cadastrado com sucesso' });
         }

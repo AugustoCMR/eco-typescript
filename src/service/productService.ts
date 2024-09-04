@@ -24,14 +24,12 @@ import { BadRequestError } from "../helpers/api-erros";
 
 export class ProductService
 {
-    async createProduct(product: Product)
+    async createProduct(product: productSchema)
     {
-       
-        const validatedData = productSchema.parse(product);
-        await validateEntityName(productRepository, 'Produto', validatedData.nome, 'nome')
+        await validateEntityName(productRepository, 'Produto', product.nome, 'nome')
 
-        validatedData.codigo = await new CodeGenerator().generateCode("product");
-        const newProduct = productRepository.create(validatedData);
+        product.codigo = await new CodeGenerator().generateCode("product");
+        const newProduct = productRepository.create(product);
         await productRepository.save(newProduct);
     }
 
