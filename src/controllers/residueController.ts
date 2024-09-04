@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { ResidueService } from "../service/residueService"
 import { residueRepository } from '../repositories/residueRepository';
 import { ZodError } from 'zod';
+import {residueSchema} from "../validators/residueValidator";
 
 export class ResidueController
 {   
@@ -17,7 +18,9 @@ export class ResidueController
     {
         try
         {
-            await this.residueService.createResidue(req.body.residue);
+            const validatedData = residueSchema.parse(req.body.residue);
+
+            await this.residueService.createResidue(validatedData);
 
             res.status(201).json({ message: 'Resíduo cadastrado com sucesso'});
         }

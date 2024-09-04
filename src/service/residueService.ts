@@ -8,15 +8,13 @@ import { residueSchema } from "../validators/residueValidator";
 
 export class ResidueService
 {
-    async createResidue(residue: Residue)
-    {   
-        const validatedData = residueSchema.parse(residue);
-        await validateEntityName(residueRepository, 'Resíduo', validatedData.nome, 'nome');
+    async createResidue(residue: residueSchema)
+    {
+        await validateEntityName(residueRepository, 'Resíduo', residue.nome, 'nome');
 
-        let code: number = await new CodeGenerator().generateCode("residue");
+        residue.codigo = await new CodeGenerator().generateCode("residue");
 
-        validatedData.codigo = code;
-        const newResidue = residueRepository.create(validatedData);
+        const newResidue = residueRepository.create(residue);
         await residueRepository.save(newResidue);
     }
 
