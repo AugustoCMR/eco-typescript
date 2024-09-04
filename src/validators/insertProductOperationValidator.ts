@@ -30,3 +30,5 @@ export const schemaInsertProduct = z.object(
         products: insertProductSchema
     }
 )
+
+export type insertProductSchema = z.infer<typeof schemaInsertProduct>;
