@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import {NextFunction, Request, Response} from 'express';
 import { ResidueService } from "../service/residueService"
 import { residueRepository } from '../repositories/residueRepository';
 import { ZodError } from 'zod';
@@ -14,7 +14,7 @@ export class ResidueController
         this.residueService = new ResidueService();
     }
 
-    createResidue = async (req: Request, res: Response) =>
+    createResidue = async (req: Request, res: Response, next: NextFunction) =>
     {
         try
         {
@@ -28,18 +28,11 @@ export class ResidueController
         {
             console.error("Erro ao criar resíduo:", error);
 
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
         }
     }
 
-    updateResidue = async (req: Request, res: Response) =>
+    updateResidue = async (req: Request, res: Response, next: NextFunction) =>
     {
         try 
         {
@@ -51,19 +44,12 @@ export class ResidueController
         catch (error) 
         {
             console.error("Erro ao atualizar resíduo:", error);
-            
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+
+            next(error);
         }
     }
 
-    deleteResidue = async (req: Request, res: Response) =>
+    deleteResidue = async (req: Request, res: Response, next: NextFunction) =>
     {
         try 
         {
@@ -73,22 +59,14 @@ export class ResidueController
             res.status(204).send();
         } 
         catch (error) 
-        {   
-
+        {
             console.error("Erro ao deletar resíduo:", error);
 
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+            next(error);
         }
     }
 
-    async getAllResidues(req: Request, res: Response)
+    async getAllResidues(req: Request, res: Response, next: NextFunction)
     {
         try 
         {
@@ -99,11 +77,11 @@ export class ResidueController
         catch (error) 
         {
             console.error("Erro ao buscar resíduos:", error);
-            res.status(500).json({ error: error });
+            next(error);
         }
     }
 
-    getResidueById = async (req: Request, res: Response) =>
+    getResidueById = async (req: Request, res: Response, next: NextFunction) =>
     {
         try 
         {
@@ -115,15 +93,8 @@ export class ResidueController
         catch (error) 
         {
             console.error("Erro ao buscar resíduo:", error);
-           
-            if(error instanceof ZodError)
-            {
-                res.status(400).json({ error: error.issues[0].message })
-            }
-            else
-            {
-                error instanceof Error ?  res.status(404).json({ error: error.message }) : res.status(500).json({ error: "Ocorreu um erro interno no servidor" });
-            }
+
+            next(error);
         }
     }
 }   
