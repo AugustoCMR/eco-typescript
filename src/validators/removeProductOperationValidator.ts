@@ -57,3 +57,5 @@ export const schemaMasterDetail = z.object({
   master: masterSchema,
   detail: detailSchema
 });
+
+export type removeProductSchema = z.infer<typeof schemaMasterDetail>
