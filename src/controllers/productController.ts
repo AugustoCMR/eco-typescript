@@ -4,6 +4,7 @@ import { productRepository } from '../repositories/productRepository';
 import { ManagerDB } from '../utils/managerDB';
 import {productSchema} from "../validators/productValidator";
 import {idSchema} from "../validators/idValidator";
+import {schemaInsertProduct} from "../validators/insertProductOperationValidator";
 
 export class ProductController
 {
@@ -105,7 +106,9 @@ export class ProductController
 
         try 
         {
-            await this.productService.insertProductOperation(req.body.produtos, conn);
+            const validatedData = schemaInsertProduct.parse({products: req.body.produtos});
+
+            await this.productService.insertProductOperation(validatedData, conn);
 
             res.status(201).json({ message: 'Produtos recebidos com sucesso.' });
         } 

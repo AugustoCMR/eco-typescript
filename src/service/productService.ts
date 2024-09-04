@@ -15,8 +15,7 @@ import {
     validateIdParam,
     validateRepeatedItem
 } from "../utils/validations";
-import { idSchema } from "../validators/idValidator";
-import { schemaInsertProduct } from "../validators/insertProductOperationValidator";
+import {insertProductSchema, schemaInsertProduct} from "../validators/insertProductOperationValidator";
 import { productSchema } from "../validators/productValidator";
 import { schemaMasterDetail } from "../validators/removeProductOperationValidator";
 import { BadRequestError } from "../helpers/api-erros";
@@ -60,14 +59,12 @@ export class ProductService
         return await validateIdParam(productRepository, 'Produto', code);
     }
 
-    async insertProductOperation (products: InsertProductOperation[], queryRunner: QueryRunner)
-    {   
-        const validatedData = schemaInsertProduct.parse({products: products});
-
+    async insertProductOperation (object: insertProductSchema, queryRunner: QueryRunner)
+    {
         let idProduct;
         let insertedProducts: number[] = [];
 
-        for(let operation of validatedData.products)
+        for(let operation of object.products)
         {
             idProduct = Number(operation.produto);
 
