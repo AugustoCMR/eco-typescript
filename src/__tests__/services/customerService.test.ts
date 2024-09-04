@@ -4,7 +4,8 @@ import { CodeGenerator } from "../../utils/codeGenerator";
 import { generateHash } from "../../utils/hash";
 import { customerSchema } from "../../validators/customerValidator";
 import {BadRequestError, NotFoundError} from "../../helpers/api-erros";
-import { validateIdParam } from "../../utils/validations";
+import {validateDelete, validateIdParam} from "../../utils/validations";
+import {receivedMaterialRepository} from "../../repositories/receivedMaterialRepository";
 
 jest.mock('../../repositories/customerRepository', () => {
     return {
@@ -12,7 +13,8 @@ jest.mock('../../repositories/customerRepository', () => {
             create: jest.fn(),
             save: jest.fn(),
             findOneBy: jest.fn(),
-            update: jest.fn()
+            update: jest.fn(),
+            delete: jest.fn()
         },
     };
 });
@@ -36,7 +38,8 @@ describe('CustomerService', () =>
     const customerRepositorySaveMock = customerRepository.save as jest.Mock;
     const CodeGeneratorMock = CodeGenerator.prototype.generateCode as jest.Mock;
     const generateHashMock = generateHash as jest.Mock;
-    let validationMock = validateIdParam as jest.Mock;
+    let validationIdParamMock = validateIdParam as jest.Mock;
+    let validateDeleteMock = validateDelete as jest.Mock;
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -183,13 +186,13 @@ describe('CustomerService', () =>
                 numero: 'aaa',
             }
 
-            validationMock.mockReturnValue(mockCustomer);
+            validationIdParamMock.mockReturnValue(mockCustomer);
 
             await customerService.updateCustomer(code, mockCustomer);
 
-            expect(validationMock).toHaveBeenCalledTimes(1);
+            expect(validationIdParamMock).toHaveBeenCalledTimes(1);
 
-            expect(validationMock).toHaveBeenCalledWith(customerRepository, "usuário", code);
+            expect(validationIdParamMock).toHaveBeenCalledWith(customerRepository, "usuário", code);
             expect(customerRepository.update).toHaveBeenCalledWith(
                 {
                     codigo: code
@@ -219,16 +222,56 @@ describe('CustomerService', () =>
                     numero: 'aaa',
             }
 
-            validationMock.mockImplementation(() => {
+            validationIdParamMock.mockImplementation(() => {
                 throw new NotFoundError(`O ID do usuário não foi encontrado`);
             });
 
             await expect(customerService.updateCustomer(code, mockCustomer)).rejects.toThrow(NotFoundError);
 
-            expect(validationMock).toHaveBeenCalledTimes(1);
-            expect(customerRepository.update).not.toHaveBeenCalledTimes(1);
+            expect(validationIdParamMock).toHaveBeenCalledTimes(1);
+            expect(customerRepository.update).not.toHaveBeenCalledTimes();
         })
 
+    })
+
+    describe('Delete Customer', () =>
+    {
+        it('Delete Success Customer', async () =>
+        {
+            let code = 1;
+
+            const mockCustomer: customerSchema =
+            {
+                    nome: 'Augusto',
+                    email: 'augusto@email.com',
+                    senha: '1234',
+                    ecosaldo: 1,
+                    cpf: '12345678911',
+                    pais: 'brasil',
+                    estado: 'bahia',
+                    cidade: 'salvador',
+                    cep: '123',
+                    rua: 'aaa',
+                    bairro: 'aaaa',
+                    numero: 'aaa',
+            }
+
+            validationIdParamMock.mockReturnValue(mockCustomer);
+
+            await customerService.deleteCustomer(code);
+
+            expect(validationIdParamMock).toHaveBeenCalledTimes(1);
+            expect(validateDeleteMock).toHaveBeenCalledTimes(1);
+
+            expect(validationIdParamMock).toHaveBeenCalledWith(customerRepository, "usuário", code);
+            expect(validateDeleteMock).toHaveBeenCalledWith(receivedMaterialRepository, {customer: mockCustomer}, "usuário");
+            expect(customerRepository.delete).toHaveBeenCalledWith(
+                {
+                    codigo: code
+                }
+            );
+
+        })
     })
 
 
