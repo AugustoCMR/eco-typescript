@@ -1,6 +1,5 @@
 import { QueryRunner } from "typeorm";
 import { InsertProductOperation } from "../models/insertProductOperationModel";
-import { Product } from "../models/productModel";
 import { RemoveProductOperationDetail } from "../models/removeProductOperationDetailModel";
 import { RemoveProductOperation } from "../models/removeProductOperationModel";
 import { customerRepository } from "../repositories/customerRepository";
@@ -56,11 +55,9 @@ export class ProductService
         await productRepository.delete({ codigo: code });
     }
 
-    async getProductById(code: string)
+    async getProductById(code: number)
     {
-        const idValidated = parseInt(idSchema.parse(code));
-
-        return await validateIdParam(productRepository, 'Produto', idValidated);
+        return await validateIdParam(productRepository, 'Produto', code);
     }
 
     async insertProductOperation (products: InsertProductOperation[], queryRunner: QueryRunner)

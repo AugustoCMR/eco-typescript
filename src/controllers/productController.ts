@@ -87,8 +87,8 @@ export class ProductController
     {
         try
         {
-            const code = req.params.id;
-            const product = await this.productService.getProductById(code);
+            const idValidated = parseInt(idSchema.parse(req.params.id));
+            const product = await this.productService.getProductById(idValidated);
 
             res.json(product);
         }
