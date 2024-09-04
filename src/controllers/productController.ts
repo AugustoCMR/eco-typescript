@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { ProductService } from "../service/productService";
 import { productRepository } from '../repositories/productRepository';
-import { ZodError } from 'zod';
 import { ManagerDB } from '../utils/managerDB';
 import {productSchema} from "../validators/productValidator";
+import {idSchema} from "../validators/idValidator";
 
 export class ProductController
 {
@@ -37,8 +37,10 @@ export class ProductController
     {
         try 
         {
-            const code = req.params.id;
-            await this.productService.updateProduct(code, req.body.product);
+            const idValidated = parseInt(idSchema.parse(req.params.id));
+            const validatedData = productSchema.parse(req.body.product);
+
+            await this.productService.updateProduct(idValidated, validatedData);
 
             res.status(201).json( {message: "Produto atualizado com sucesso"} )
         } 

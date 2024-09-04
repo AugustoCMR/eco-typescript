@@ -33,18 +33,16 @@ export class ProductService
         await productRepository.save(newProduct);
     }
 
-    async updateProduct(code: string, product: Product)
-    {   
-        const idValidated = parseInt(idSchema.parse(code));
-        const validatedData = productSchema.parse(product);
-        await validateEntityName(productRepository, 'Produto', validatedData.nome, 'nome', idValidated);
-        await validateIdParam(productRepository, 'Produto', idValidated);
+    async updateProduct(code: number, product: productSchema)
+    {
+        await validateEntityName(productRepository, 'Produto', product.nome, 'nome', code);
+        await validateIdParam(productRepository, 'Produto', code);
 
         await productRepository.update
         (   
-            {codigo: idValidated},
+            {codigo: code},
             {
-                ...validatedData
+                ...product
             }
         )
     }
