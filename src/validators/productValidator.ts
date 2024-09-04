@@ -26,3 +26,5 @@ export const productSchema = z.object
         ).positive("Eco Point deve ser maior que zero")
     }
 )
+
+export type productSchema = z.infer<typeof productSchema>;
