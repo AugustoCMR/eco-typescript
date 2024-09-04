@@ -1,7 +1,4 @@
 import { QueryRunner } from "typeorm";
-import { InsertProductOperation } from "../models/insertProductOperationModel";
-import { RemoveProductOperationDetail } from "../models/removeProductOperationDetailModel";
-import { RemoveProductOperation } from "../models/removeProductOperationModel";
 import { customerRepository } from "../repositories/customerRepository";
 import { insertProductOperationRepository } from "../repositories/insertProductOperationRepository";
 import { productRepository } from "../repositories/productRepository";
@@ -15,9 +12,9 @@ import {
     validateIdParam,
     validateRepeatedItem
 } from "../utils/validations";
-import {insertProductSchema, schemaInsertProduct} from "../validators/insertProductOperationValidator";
+import {insertProductSchema} from "../validators/insertProductOperationValidator";
 import { productSchema } from "../validators/productValidator";
-import { schemaMasterDetail } from "../validators/removeProductOperationValidator";
+import {removeProductSchema} from "../validators/removeProductOperationValidator";
 import { BadRequestError } from "../helpers/api-erros";
 
 export class ProductService
@@ -89,26 +86,22 @@ export class ProductService
         await queryRunner.commitTransaction()
     }
 
-    async removeProductOperation (removeProductOperation: RemoveProductOperation, removeProductsOperationDetail: RemoveProductOperationDetail[], queryRunner: QueryRunner)
+    async removeProductOperation (object: removeProductSchema, queryRunner: QueryRunner)
     {   
-       
-
-        const validatedData = schemaMasterDetail.parse({master: removeProductOperation, detail: removeProductsOperationDetail});
-        
 
         let idProduct;
         let product;
         let removedProducts: number[] = [];
 
-        const idCustomer = Number(validatedData.master.customer);
+        const idCustomer = Number(object.master.customer);
 
         const customer = await validateIdBody(customerRepository, idCustomer, "Usuário");
 
-        validatedData.master.codigo = await new CodeGenerator().generateCode("remove_product_operation");
+        object.master.codigo = await new CodeGenerator().generateCode("remove_product_operation");
 
         const newRemoveProductOperation = removeProductOperationRepository.create(
             {
-                ...validatedData.master,
+                ...object.master,
                 customer
             }
         );
@@ -123,7 +116,7 @@ export class ProductService
 
         await queryRunner.manager.save(customer);
 
-        for (const detail of validatedData.detail)
+        for (const detail of object.detail)
         {
             idProduct = Number(detail.produto);
 
@@ -154,9 +147,7 @@ export class ProductService
     }
 
     async validateCustomerBalance(customerBalance: number, totalBalance: number)
-    {   
-
-    
+    {
         if(customerBalance < totalBalance)
         {   
             throw new BadRequestError("Saldo insuficiente para esta operação");

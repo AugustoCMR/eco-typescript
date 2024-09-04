@@ -5,6 +5,7 @@ import { ManagerDB } from '../utils/managerDB';
 import {productSchema} from "../validators/productValidator";
 import {idSchema} from "../validators/idValidator";
 import {schemaInsertProduct} from "../validators/insertProductOperationValidator";
+import {schemaMasterDetail} from "../validators/removeProductOperationValidator";
 
 export class ProductController
 {
@@ -131,7 +132,9 @@ export class ProductController
 
         try 
         {
-            await this.productService.removeProductOperation(req.body.master, req.body.detail, conn);
+            const validatedData = schemaMasterDetail.parse({master: req.body.master, detail: req.body.detail});
+
+            await this.productService.removeProductOperation(validatedData, conn);
 
             res.status(201).json({ message: 'Retirada de produtos cadastrada com sucesso.' });
         } 
