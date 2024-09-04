@@ -43,13 +43,10 @@ export class ResidueService
         await residueRepository.delete({ codigo: code });
     } 
 
-    async getResidueById(code: string)
+    async getResidueById(code: number)
     {
-        const idValidated = parseInt(idSchema.parse(code)); 
-        await validateIdParam(residueRepository, "resíduo", idValidated);
+        await validateIdParam(residueRepository, "resíduo", code);
 
-        const residue = await residueRepository.findOneBy({ codigo: idValidated });
-
-        return residue;
+        return await residueRepository.findOneBy({ codigo: code });
     }
 }   

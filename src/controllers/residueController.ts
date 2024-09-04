@@ -89,8 +89,9 @@ export class ResidueController
     {
         try 
         {
-            const code = req.params.id;
-            const residue = await this.residueService.getResidueById(code);
+            const idValidated = parseInt(idSchema.parse(req.params.id));
+
+            const residue = await this.residueService.getResidueById(idValidated);
  
             res.json(residue); 
         } 
