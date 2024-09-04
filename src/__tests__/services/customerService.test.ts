@@ -229,7 +229,7 @@ describe('CustomerService', () =>
             await expect(customerService.updateCustomer(code, mockCustomer)).rejects.toThrow(NotFoundError);
 
             expect(validationIdParamMock).toHaveBeenCalledTimes(1);
-            expect(customerRepository.update).not.toHaveBeenCalledTimes();
+            expect(customerRepository.update).not.toHaveBeenCalledTimes(1);
         })
 
     })
