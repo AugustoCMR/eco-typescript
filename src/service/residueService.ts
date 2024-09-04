@@ -18,21 +18,20 @@ export class ResidueService
         await residueRepository.save(newResidue);
     }
 
-    async updateResidue(code: string, residue: Residue)
+    async updateResidue(code: number, residue: residueSchema)
     {
-        const idValidated = parseInt(idSchema.parse(code));
 
-        await validateIdParam(residueRepository, "resíduo", idValidated);
+        await validateIdParam(residueRepository, "resíduo", code);
         
-        const validatedData  = residueSchema.parse(residue);
 
-        await validateEntityName(residueRepository, 'Resíduo', validatedData.nome, 'nome', idValidated);
+
+        await validateEntityName(residueRepository, 'Resíduo', residue.nome, 'nome', code);
 
         await residueRepository.update
         (
-            {codigo: idValidated},
+            {codigo: code},
             {
-                ...validatedData,
+                ...residue,
                 
             }
         )

@@ -3,6 +3,7 @@ import { ResidueService } from "../service/residueService"
 import { residueRepository } from '../repositories/residueRepository';
 import { ZodError } from 'zod';
 import {residueSchema} from "../validators/residueValidator";
+import {idSchema} from "../validators/idValidator";
 
 export class ResidueController
 {   
@@ -36,8 +37,10 @@ export class ResidueController
     {
         try 
         {
-            const code = req.params.id;
-            await this.residueService.updateResidue(code, req.body.residue);
+            const idValidated = parseInt(idSchema.parse(req.params.id));
+            const validatedData  = residueSchema.parse(req.body.residue);
+
+            await this.residueService.updateResidue(idValidated, validatedData);
 
             res.status(201).json( {message: "Usuário atualizado com sucesso"} );
         } 
