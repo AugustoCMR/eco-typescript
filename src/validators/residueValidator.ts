@@ -11,3 +11,5 @@ export const residueSchema = z.object
         ).min(1, "Nome do Resíduo é obrigatório")
     }
 )
+
+export type residueSchema = z.infer<typeof residueSchema>;
