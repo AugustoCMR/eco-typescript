@@ -219,9 +219,9 @@ describe('CustomerService', () =>
                     numero: 'aaa',
             }
 
-            validationMock = jest.fn(() => {
-                throw new NotFoundError("O ID do usuário não foi encontrado");
-            })
+            validationMock.mockImplementation(() => {
+                throw new NotFoundError(`O ID do usuário não foi encontrado`);
+            });
 
             await expect(customerService.updateCustomer(code, mockCustomer)).rejects.toThrow(NotFoundError);
 
