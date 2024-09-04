@@ -20,10 +20,7 @@ export class ResidueService
 
     async updateResidue(code: number, residue: residueSchema)
     {
-
         await validateIdParam(residueRepository, "resíduo", code);
-        
-
 
         await validateEntityName(residueRepository, 'Resíduo', residue.nome, 'nome', code);
 
@@ -37,14 +34,13 @@ export class ResidueService
         )
     }
 
-    async deleteResidue(code: string)
-    {   
-        const idValidated = parseInt(idSchema.parse(code));
-        const residue = await validateIdParam(residueRepository, "resíduo", idValidated);
+    async deleteResidue(code: number)
+    {
+        const residue = await validateIdParam(residueRepository, "resíduo", code);
 
         await validateDelete(materialRepository, {residue: residue}, "resíduo");
 
-        await residueRepository.delete({ codigo: idValidated });
+        await residueRepository.delete({ codigo: code });
     } 
 
     async getResidueById(code: string)

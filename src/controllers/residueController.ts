@@ -56,8 +56,9 @@ export class ResidueController
     {
         try 
         {
-            const code = req.params.id;
-            await this.residueService.deleteResidue(code);
+            const idValidated = parseInt(idSchema.parse(req.params.id));
+
+            await this.residueService.deleteResidue(idValidated);
 
             res.status(204).send();
         } 
