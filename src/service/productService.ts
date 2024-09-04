@@ -47,14 +47,13 @@ export class ProductService
         )
     }
 
-    async deleteProduct(code: string)
-    {   
-        const idValidated = parseInt(idSchema.parse(code));
-        const product = await validateIdParam(productRepository, 'Produto', idValidated);
+    async deleteProduct(code: number)
+    {
+        const product = await validateIdParam(productRepository, 'Produto', code);
 
         await validateDelete(insertProductOperationRepository, {produto: product}, 'Produto');
 
-        await productRepository.delete({ codigo: idValidated });
+        await productRepository.delete({ codigo: code });
     }
 
     async getProductById(code: string)

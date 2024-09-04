@@ -55,8 +55,9 @@ export class ProductController
     {   
         try 
         {
-            const code = req.params.id;
-            await this.productService.deleteProduct(code);
+            const idValidated = parseInt(idSchema.parse(req.params.id));
+
+            await this.productService.deleteProduct(idValidated);
     
             res.status(204).send();
         } 
