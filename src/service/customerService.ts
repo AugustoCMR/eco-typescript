@@ -77,6 +77,7 @@ export class CustomerService
         await validateIdParam(customerRepository, "usuário", code);
 
         return await AppDataSource.query(`
+           
             SELECT 
                 ct.nome, 
                 ct.ecosaldo,
@@ -111,17 +112,17 @@ export class CustomerService
             FROM 
                 customer AS ct
             INNER JOIN 
-                remove_product_operation AS rpo ON ct.id = rpo."usuarioId"
+                remove_product_operation AS rpo ON ct.id = rpo."customerId"
             INNER JOIN
                 remove_product_operation_detail AS rpod ON rpo.id = rpod."removeProductOperationId"
             INNER JOIN
-                product AS pd ON rpod."produtoId" = pd.id
+                product AS pd ON rpod."productId" = pd.id
             WHERE 
                 ct.codigo = $1
 
             ORDER BY 
                 created_at DESC;
-        `, [code]);
+            `, [code]);
     }
 
     async validateCPFAndEmail(cpf: string, email: string)
