@@ -3,6 +3,7 @@ import { z } from 'zod';
 export const customerSchema = z.object
 (
     {
+        id: z.number().optional(),
         codigo: z.number().optional(),
         nome: z.string
         (

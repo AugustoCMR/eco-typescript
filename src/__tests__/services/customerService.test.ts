@@ -1,11 +1,12 @@
 import { CustomerService } from '../../service/customerService';
 import {customerRepository} from "../../repositories/customerRepository";
 import { CodeGenerator } from "../../utils/codeGenerator";
-import { generateHash } from "../../utils/hash";
+import {checkPassword, generateHash} from "../../utils/hash";
 import { customerSchema } from "../../validators/customerValidator";
 import {BadRequestError, NotFoundError} from "../../helpers/api-erros";
 import {validateDelete, validateIdParam} from "../../utils/validations";
 import {receivedMaterialRepository} from "../../repositories/receivedMaterialRepository";
+import {generateToken} from "../../utils/token";
 
 jest.mock('../../repositories/customerRepository', () => {
     return {
@@ -20,6 +21,7 @@ jest.mock('../../repositories/customerRepository', () => {
 });
 jest.mock('../../utils/codeGenerator');
 jest.mock('../../utils/hash');
+jest.mock('../../utils/token')
 jest.mock('../../data-source', () => {
     return {
         AppDataSource: {
@@ -36,8 +38,11 @@ describe('CustomerService', () =>
 
     const customerRepositoryCreateMock = customerRepository.create as jest.Mock;
     const customerRepositorySaveMock = customerRepository.save as jest.Mock;
+    const customerRepositoryFindMock = customerRepository.findOneBy as jest.Mock;
     const CodeGeneratorMock = CodeGenerator.prototype.generateCode as jest.Mock;
     const generateHashMock = generateHash as jest.Mock;
+    const generateTokenMock = generateToken as jest.Mock;
+    const checkPasswordMock = checkPassword as jest.Mock;
     let validationIdParamMock = validateIdParam as jest.Mock;
     let validateDeleteMock = validateDelete as jest.Mock;
 
@@ -229,7 +234,7 @@ describe('CustomerService', () =>
             await expect(customerService.updateCustomer(code, mockCustomer)).rejects.toThrow(NotFoundError);
 
             expect(validationIdParamMock).toHaveBeenCalledTimes(1);
-            expect(customerRepository.update).not.toHaveBeenCalledTimes(1);
+            expect(customerRepository.update).not.toHaveBeenCalled();
         })
 
     })
@@ -266,13 +271,174 @@ describe('CustomerService', () =>
             expect(validationIdParamMock).toHaveBeenCalledWith(customerRepository, "usuário", code);
             expect(validateDeleteMock).toHaveBeenCalledWith(receivedMaterialRepository, {customer: mockCustomer}, "usuário");
             expect(customerRepository.delete).toHaveBeenCalledWith(
-                {
-                    codigo: code
-                }
-            );
+            {
+                codigo: code
+            });
 
+        })
+
+        it('Delete Failed Customer - Customer Not Found', async () =>
+        {
+            let code = 2;
+
+            const mockCustomer: customerSchema =
+            {
+                nome: 'Augusto',
+                email: 'augusto@email.com',
+                senha: '1234',
+                ecosaldo: 1,
+                cpf: '12345678911',
+                pais: 'brasil',
+                estado: 'bahia',
+                cidade: 'salvador',
+                cep: '123',
+                rua: 'aaa',
+                bairro: 'aaaa',
+                numero: 'aaa',
+            }
+
+            validationIdParamMock.mockImplementation(() => {
+                throw new NotFoundError(`O ID do usuário não foi encontrado`);
+            });
+
+            await expect(customerService.deleteCustomer(code)).rejects.toThrow(NotFoundError);
+
+            expect(validationIdParamMock).toHaveBeenCalledTimes(1);
+            expect(validateDeleteMock).not.toHaveBeenCalledTimes(1);
+            expect(customerRepository.delete).not.toHaveBeenCalled();
+        })
+
+        it('Delete failed Customer - Customer has records ', async () =>
+        {
+            let code = 2;
+
+            const mockCustomer: customerSchema =
+            {
+                nome: 'Augusto',
+                email: 'augusto@email.com',
+                senha: '1234',
+                ecosaldo: 1,
+                cpf: '12345678911',
+                pais: 'brasil',
+                estado: 'bahia',
+                cidade: 'salvador',
+                cep: '123',
+                rua: 'aaa',
+                bairro: 'aaaa',
+                numero: 'aaa',
+            }
+
+            validateDeleteMock.mockImplementation(() =>
+            {
+                throw new BadRequestError('Não é possível deletar um usuário que possui registros.')
+            })
+
+            validationIdParamMock.mockReturnValue(mockCustomer);
+
+            await expect(customerService.deleteCustomer(code)).rejects.toThrow(BadRequestError);
+
+            expect(validateDeleteMock).toHaveBeenCalledWith(receivedMaterialRepository, {customer: mockCustomer}, "usuário");
+            expect(validationIdParamMock).toHaveBeenCalledTimes(1)
+            expect(validationIdParamMock).toHaveBeenCalledWith(customerRepository, "usuário", code);
+            expect(customerRepository.delete).not.toHaveBeenCalled();
         })
     })
 
+    describe('Find Customer By ID', () =>
+    {
+        it('Find Customer By ID Success', async () =>
+        {
+            let code = 1;
 
+            const mockCustomer: customerSchema =
+            {
+                nome: 'Augusto',
+                email: 'augusto@email.com',
+                senha: '1234',
+                ecosaldo: 1,
+                cpf: '12345678911',
+                pais: 'brasil',
+                estado: 'bahia',
+                cidade: 'salvador',
+                cep: '123',
+                rua: 'aaa',
+                bairro: 'aaaa',
+                numero: 'aaa',
+            }
+
+            const {senha, ...customer} = mockCustomer;
+
+            validationIdParamMock.mockReturnValue(mockCustomer);
+
+            const result = await customerService.getCustomerById(code);
+
+            expect(validationIdParamMock).toHaveBeenCalledTimes(1);
+            expect(validationIdParamMock).toHaveBeenCalledWith(customerRepository, "usuário", code);
+
+            expect(result).toEqual(customer);
+        })
+
+        it('Find Customer By ID Failed - Customer not found', async () =>
+        {
+            let code = 1;
+
+            validationIdParamMock.mockImplementation(() => {
+                throw new NotFoundError(`O ID do usuário não foi encontrado`);
+            });
+
+            await expect(customerService.getCustomerById(code)).rejects.toThrow(NotFoundError);
+
+            expect(validationIdParamMock).toHaveBeenCalledTimes(1);
+            expect(validationIdParamMock).toHaveBeenCalledWith(customerRepository, "usuário", code);
+        })
+    })
+
+    describe('Login', () =>
+    {
+        it('Login Customer Success', async() =>
+        {
+            const mockCustomer: customerSchema =
+            {
+                id: 1,
+                codigo: 2,
+                nome: 'Augusto',
+                email: 'augusto@email.com',
+                senha: 'hashpassword',
+                ecosaldo: 1,
+                cpf: '12345678911',
+                pais: 'brasil',
+                estado: 'bahia',
+                cidade: 'salvador',
+                cep: '123',
+                rua: 'aaa',
+                bairro: 'aaaa',
+                numero: 'aaa',
+            }
+
+            const emailCustomer = mockCustomer.email;
+            const passwordHash = mockCustomer.senha;
+
+            const email = 'augusto@email.com'
+            const password = '1234'
+
+            customerRepositoryFindMock.mockResolvedValue(mockCustomer);
+            generateTokenMock.mockResolvedValue('mockToken');
+
+            checkPasswordMock.mockImplementation((password, hash) => {
+                return password === '1234' && hash === 'hashpassword';
+            });
+
+            const token = await customerService.login(email, password);
+
+            expect(customerRepositoryFindMock).toHaveBeenCalledTimes(1);
+            expect(checkPasswordMock).toHaveBeenCalledTimes(1);
+            expect(generateTokenMock).toHaveBeenCalledTimes(1);
+
+            expect(customerRepositoryFindMock).toHaveBeenCalledWith({ email: email });
+            expect(checkPasswordMock).toHaveBeenCalledWith(password, passwordHash);
+            expect(generateTokenMock).toHaveBeenCalledWith({ customerId: mockCustomer.id, email: mockCustomer.email });
+
+            expect(token).toEqual('mockToken');
+        })
+    })
 });
