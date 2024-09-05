@@ -7,6 +7,7 @@ import {BadRequestError, NotFoundError} from "../../helpers/api-erros";
 import {validateDelete, validateIdParam} from "../../utils/validations";
 import {receivedMaterialRepository} from "../../repositories/receivedMaterialRepository";
 import {generateToken} from "../../utils/token";
+import {AppDataSource} from "../../data-source";
 
 jest.mock('../../repositories/customerRepository', () => {
     return {
@@ -27,6 +28,7 @@ jest.mock('../../data-source', () => {
         AppDataSource: {
             initialize: jest.fn(),
             getRepository: jest.fn(),
+            query: jest.fn()
         },
     };
 });
@@ -281,22 +283,6 @@ describe('CustomerService', () =>
         {
             let code = 2;
 
-            const mockCustomer: customerSchema =
-            {
-                nome: 'Augusto',
-                email: 'augusto@email.com',
-                senha: '1234',
-                ecosaldo: 1,
-                cpf: '12345678911',
-                pais: 'brasil',
-                estado: 'bahia',
-                cidade: 'salvador',
-                cep: '123',
-                rua: 'aaa',
-                bairro: 'aaaa',
-                numero: 'aaa',
-            }
-
             validationIdParamMock.mockImplementation(() => {
                 throw new NotFoundError(`O ID do usuário não foi encontrado`);
             });
@@ -507,6 +493,44 @@ describe('CustomerService', () =>
             expect(checkPasswordMock).toHaveBeenCalledTimes(1);
             expect(generateTokenMock).not.toHaveBeenCalled();
 
+        })
+    })
+
+    describe('Extract', () =>
+    {
+        it('Extract Success - Empty', async () =>
+        {
+            let code = 1;
+
+            validationIdParamMock.mockImplementation((code) =>
+            {
+                if(code === 1)
+                    return true;
+            })
+
+            AppDataSource.query = jest.fn().mockResolvedValue([]);
+
+            const extract = await customerService.extract(code);
+
+            expect(validationIdParamMock).toHaveBeenCalledTimes(1);
+            expect(validationIdParamMock).toHaveBeenCalledWith(customerRepository, "usuário", code);
+
+            expect(extract).toEqual([]);
+        })
+
+        it('Extract Failed - Customer Not Found', async() =>
+        {
+            let code = 1;
+
+            validationIdParamMock.mockImplementation(() =>
+            {
+                throw new NotFoundError("O ID do usuário não foi encontrado");
+            })
+
+            await expect(customerService.extract(code)).rejects.toThrow(NotFoundError);
+
+            expect(validationIdParamMock).toHaveBeenCalledTimes(1);
+            expect(validationIdParamMock).toHaveBeenCalledWith(customerRepository, "usuário", code);
         })
     })
 });
