@@ -415,7 +415,6 @@ describe('CustomerService', () =>
                 numero: 'aaa',
             }
 
-            const emailCustomer = mockCustomer.email;
             const passwordHash = mockCustomer.senha;
 
             const email = 'augusto@email.com'
@@ -439,6 +438,75 @@ describe('CustomerService', () =>
             expect(generateTokenMock).toHaveBeenCalledWith({ customerId: mockCustomer.id, email: mockCustomer.email });
 
             expect(token).toEqual('mockToken');
+        })
+
+        it('Login Customer Failed - E-mail not found', async () =>
+        {
+            const email = 'notFound'
+            const password = '1234'
+
+            const verifyEmail = customerRepositoryFindMock.mockImplementation((email) =>
+            {
+                if(email === 'notFound')
+                    return false;
+            })
+
+            if(!verifyEmail)
+            {
+                throw new BadRequestError("Credenciais inválidas");
+            }
+
+            await expect(customerService.login(email, password)).rejects.toThrow(BadRequestError);
+
+            expect(customerRepositoryFindMock).toHaveBeenCalledTimes(1);
+            expect(checkPasswordMock).not.toHaveBeenCalled();
+            expect(generateTokenMock).not.toHaveBeenCalled();
+
+            expect(customerRepositoryFindMock).toHaveBeenCalledWith({ email: email });
+        })
+
+        it('Login Customer Failed - Incorrect Password', async () =>
+        {
+            const mockCustomer: customerSchema =
+            {
+                id: 1,
+                codigo: 2,
+                nome: 'Augusto',
+                email: 'augusto@email.com',
+                senha: 'hashpassword',
+                ecosaldo: 1,
+                cpf: '12345678911',
+                pais: 'brasil',
+                estado: 'bahia',
+                cidade: 'salvador',
+                cep: '123',
+                rua: 'aaa',
+                bairro: 'aaaa',
+                numero: 'aaa',
+            }
+
+            const email = 'augusto@email.com'
+            const password = '1234'
+
+            customerRepositoryFindMock.mockReturnValue(mockCustomer);
+
+            const verifyPassword = checkPasswordMock.mockImplementation((password, hash) =>
+            {
+                if(password === 'incorrectPassword' && hash === 'hashpassword')
+                    return false;
+            })
+
+            if(!verifyPassword)
+            {
+                throw new BadRequestError("Credenciais inválidas");
+            }
+
+            await expect(customerService.login(email, password)).rejects.toThrow(BadRequestError);
+
+            expect(customerRepositoryFindMock).toHaveBeenCalledTimes(1);
+            expect(checkPasswordMock).toHaveBeenCalledTimes(1);
+            expect(generateTokenMock).not.toHaveBeenCalled();
+
         })
     })
 });
